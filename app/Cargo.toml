@@ -43,6 +43,8 @@ redis = { version = "0.23", features = [
     "cluster-async",
     "tokio-comp",
 ] }
+utoipa = { version = "4.2.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
 
 # workspace modules
 pkg = { path = "../pkg" }
