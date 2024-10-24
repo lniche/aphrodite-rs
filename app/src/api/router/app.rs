@@ -1,5 +1,5 @@
 use crate::api::{
-    controller::{account, auth, health, project},
+    controller::{user, auth, health},
     middleware,
 };
 use axum::{
@@ -22,10 +22,8 @@ pub fn init() -> Router {
     // 需授权
     let auth = Router::new()
         .route("/logout", get(auth::logout))
-        .route("/accounts", get(account::list).post(account::create))
-        .route("/accounts/:account_id", get(account::info))
-        .route("/projects", get(project::list).post(project::create))
-        .route("/projects/:project_id", get(project::detail))
+        .route("/user", get(user::list).post(user::create))
+        .route("/user/:user_id", get(user::info))
         .layer(axum::middleware::from_fn(middleware::auth::handle));
 
     #[derive(OpenApi)]
@@ -58,7 +56,7 @@ pub fn init() -> Router {
         let builder: OpenApiBuilder = ApiDoc::openapi().into();
         let openapi = builder.servers(Some(servers)).build();
 
-        std::fs::write("openapi.json", openapi.to_pretty_json().unwrap())
+        std::fs::write("./docs/openapi.json", openapi.to_pretty_json().unwrap())
             .expect("Unable to create file");
 
         openapi

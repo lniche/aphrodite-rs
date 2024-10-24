@@ -14,7 +14,9 @@ use pkg::{
     util, xtime,
 };
 
-use crate::ent::{account, prelude::Account};
+use crate::ent::{user, prelude::Account};
+use chrono::{NaiveDateTime, Utc};
+
 
 #[derive(Debug, Validate, Deserialize, Serialize)]
 pub struct ReqCreate {
@@ -22,13 +24,11 @@ pub struct ReqCreate {
     pub username: String,
     #[validate(length(min = 1, message = "密码必填"))]
     pub password: String,
-    #[validate(length(min = 1, message = "实名必填"))]
-    pub realname: String,
 }
 
 pub async fn create(req: ReqCreate) -> Result<ApiOK<()>> {
     let count = Account::find()
-        .filter(account::Column::Username.eq(req.username.clone()))
+        .filter(user::Column::Username.eq(req.username.clone()))
         .count(db::conn())
         .await
         .map_err(|e| {
@@ -41,13 +41,11 @@ pub async fn create(req: ReqCreate) -> Result<ApiOK<()>> {
 
     let salt = util::nonce(16);
     let pass = format!("{}{}", req.password, salt);
-    let now = xtime::now(offset!(+8)).unix_timestamp();
-    let model = account::ActiveModel {
+    let now = Utc::now().naive_utc();
+    let model = user::ActiveModel {
         username: Set(req.username),
         password: Set(md5(pass.as_bytes())),
         salt: Set(salt),
-        role: Set(1),
-        realname: Set(req.realname),
         created_at: Set(now),
         updated_at: Set(now),
         ..Default::default()
@@ -65,15 +63,12 @@ pub async fn create(req: ReqCreate) -> Result<ApiOK<()>> {
 pub struct RespInfo {
     pub id: u64,
     pub username: String,
-    pub realname: String,
-    pub login_at: i64,
-    pub login_at_str: String,
-    pub created_at: i64,
-    pub created_at_str: String,
+    pub login_at: NaiveDateTime,
+    pub created_at: NaiveDateTime,
 }
 
-pub async fn info(account_id: u64) -> Result<ApiOK<RespInfo>> {
-    let model = Account::find_by_id(account_id)
+pub async fn info(user_id: u64) -> Result<ApiOK<RespInfo>> {
+    let model = Account::find_by_id(user_id)
         .one(db::conn())
         .await
         .map_err(|e| {
@@ -85,13 +80,8 @@ pub async fn info(account_id: u64) -> Result<ApiOK<RespInfo>> {
     let resp = RespInfo {
         id: model.id,
         username: model.username,
-        realname: model.realname,
         login_at: model.login_at,
-        login_at_str: xtime::to_string(xtime::DATETIME, model.login_at, offset!(+8))
-            .unwrap_or_default(),
         created_at: model.created_at,
-        created_at_str: xtime::to_string(xtime::DATETIME, model.created_at, offset!(+8))
-            .unwrap_or_default(),
     };
 
     Ok(ApiOK(Some(resp)))
@@ -107,7 +97,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
     let mut builder = Account::find();
     if let Some(username) = query.get("username") {
         if !username.is_empty() {
-            builder = builder.filter(account::Column::Username.eq(username.to_owned()));
+            builder = builder.filter(user::Column::Username.eq(username.to_owned()));
         }
     }
 
@@ -118,7 +108,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
         total = builder
             .clone()
             .select_only()
-            .column_as(account::Column::Id.count(), "count")
+            .column_as(user::Column::Id.count(), "count")
             .into_tuple::<i64>()
             .one(db::conn())
             .await
@@ -130,7 +120,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
     }
 
     let models = builder
-        .order_by(account::Column::Id, Order::Desc)
+        .order_by(user::Column::Id, Order::Desc)
         .offset(offset)
         .limit(limit)
         .all(db::conn())
@@ -147,13 +137,8 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
         let info = RespInfo {
             id: model.id,
             username: model.username,
-            realname: model.realname,
             login_at: model.login_at,
-            login_at_str: xtime::to_string(xtime::DATETIME, model.login_at, offset!(+8))
-                .unwrap_or_default(),
             created_at: model.created_at,
-            created_at_str: xtime::to_string(xtime::DATETIME, model.created_at, offset!(+8))
-                .unwrap_or_default(),
         };
         resp.list.push(info);
     }

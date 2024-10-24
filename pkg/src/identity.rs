@@ -6,23 +6,16 @@ use std::fmt::Display;
 
 use crate::{config, crypto::aes::CBC};
 
-pub enum Role {
-    Super,
-    Normal,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Identity {
     i: u64,
-    r: i8,
     t: String,
 }
 
 impl Identity {
-    pub fn new(id: u64, role: i8, token: String) -> Self {
+    pub fn new(id: u64, token: String) -> Self {
         Self {
             i: id,
-            r: role,
             t: token,
         }
     }
@@ -30,7 +23,6 @@ impl Identity {
     pub fn empty() -> Self {
         Self {
             i: 0,
-            r: 0,
             t: String::from(""),
         }
     }
@@ -86,12 +78,6 @@ impl Identity {
         self.t == token
     }
 
-    pub fn is_role(&self, role: Role) -> bool {
-        match role {
-            Role::Normal => self.r == 1,
-            Role::Super => self.r == 2,
-        }
-    }
 }
 
 impl Display for Identity {
@@ -99,9 +85,7 @@ impl Display for Identity {
         if self.i == 0 {
             return write!(f, "<none>");
         }
-        if self.r == 0 {
-            return write!(f, "id:{}|token:{}", self.i, self.t);
-        }
-        write!(f, "id:{}|role:{}|token:{}", self.i, self.r, self.t)
+
+        write!(f, "id:{}|token:{}", self.i, self.t)
     }
 }

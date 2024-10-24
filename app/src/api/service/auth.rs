@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sea_orm::sea_query::Expr;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
@@ -9,7 +10,7 @@ use pkg::identity::Identity;
 use pkg::result::response::{ApiErr, ApiOK, Result};
 use pkg::{db, util, xtime};
 
-use crate::ent::account;
+use crate::ent::user;
 use crate::ent::prelude::Account;
 
 #[derive(Debug, Validate, Deserialize, Serialize)]
@@ -22,14 +23,12 @@ pub struct ReqLogin {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RespLogin {
-    pub name: String,
-    pub role: i8,
     pub auth_token: String,
 }
 
 pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
     let model = Account::find()
-        .filter(account::Column::Username.eq(req.username))
+        .filter(user::Column::Username.eq(req.username))
         .one(db::conn())
         .await
         .map_err(|e| {
@@ -43,22 +42,22 @@ pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
         return Err(ApiErr::ErrAuth(Some("密码错误".to_string())));
     }
 
-    let now = xtime::now(offset!(+8)).unix_timestamp();
+    let now = Utc::now().naive_utc();
     let login_token = md5(format!("auth.{}.{}.{}", model.id, now, util::nonce(16)).as_bytes());
-    let auth_token = Identity::new(model.id, model.role, login_token.clone())
+    let auth_token = Identity::new(model.id, login_token.clone())
         .to_auth_token()
         .map_err(|e| {
             tracing::error!(error = ?e, "error identity encrypt");
             ApiErr::ErrSystem(None)
         })?;
-    let update_model = account::ActiveModel {
+    let update_model = user::ActiveModel {
         login_at: Set(now),
         login_token: Set(login_token),
         updated_at: Set(now),
         ..Default::default()
     };
     let ret_update = Account::update_many()
-        .filter(account::Column::Id.eq(model.id))
+        .filter(user::Column::Id.eq(model.id))
         .set(update_model)
         .exec(db::conn())
         .await;
@@ -68,8 +67,6 @@ pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
     }
 
     let resp = RespLogin {
-        name: model.realname,
-        role: model.role,
         auth_token,
     };
 
@@ -78,10 +75,10 @@ pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
 
 pub async fn logout(identity: Identity) -> Result<ApiOK<()>> {
     let ret = Account::update_many()
-        .filter(account::Column::Id.eq(identity.id()))
-        .col_expr(account::Column::LoginToken, Expr::value(""))
+        .filter(user::Column::Id.eq(identity.id()))
+        .col_expr(user::Column::LoginToken, Expr::value(""))
         .col_expr(
-            account::Column::CreatedAt,
+            user::Column::CreatedAt,
             Expr::value(xtime::now(offset!(+8)).unix_timestamp()),
         )
         .exec(db::conn())

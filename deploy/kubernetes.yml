@@ -1,0 +1,265 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aphrodite
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aphrodite-db
+  namespace: aphrodite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aphrodite-db
+  template:
+    metadata:
+      labels:
+        app: aphrodite-db
+    spec:
+      containers:
+      - name: aphrodite-db
+        image: mysql:8
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "123123"
+        - name: MYSQL_ROOT_HOST
+          value: "%"
+        - name: MYSQL_DATABASE
+          value: "test"
+        - name: MYSQL_PASSWORD
+          value: "123123"
+        - name: TZ
+          value: "Asia/Shanghai"
+        - name: LANG
+          value: "en_US.UTF-8"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        - name: mysql-conf
+          mountPath: /etc/mysql/conf.d
+      volumes:
+      - name: mysql-data
+        hostPath:
+          path: ./data/mysql/user
+      - name: mysql-conf
+        hostPath:
+          path: ./conf/mysql/conf.d
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aphrodite-cache
+  namespace: aphrodite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aphrodite-cache
+  template:
+    metadata:
+      labels:
+        app: aphrodite-cache
+    spec:
+      containers:
+      - name: aphrodite-cache
+        image: redis:6-alpine
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: redis-conf
+          mountPath: /etc/redis
+        command: ["redis-server", "/etc/redis/redis.conf"]
+      volumes:
+      - name: redis-data
+        hostPath:
+          path: ./data/cache/
+      - name: redis-conf
+        hostPath:
+          path: ./conf/cache/redis.conf
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aphrodite-web
+  namespace: aphrodite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aphrodite-web
+  template:
+    metadata:
+      labels:
+        app: aphrodite-web
+    spec:
+      containers:
+      - name: aphrodite-web
+        image: registry.cn-hangzhou.aliyuncs.com/threshold/aphrodite-go:v3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: web-logs
+          mountPath: /data/app/storage/logs
+        - name: web-config
+          mountPath: /data/app/config
+      volumes:
+      - name: web-logs
+        hostPath:
+          path: ./logs/web
+      - name: web-config
+        hostPath:
+          path: ./config
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aphrodite-nginx
+  namespace: aphrodite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aphrodite-nginx
+  template:
+    metadata:
+      labels:
+        app: aphrodite-nginx
+    spec:
+      containers:
+      - name: aphrodite-nginx
+        image: nginx:alpine
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: nginx-html
+          mountPath: /usr/share/nginx/html
+        - name: nginx-conf
+          mountPath: /etc/nginx/nginx.conf
+        - name: nginx-logs
+          mountPath: /var/log/nginx
+      volumes:
+      - name: nginx-html
+        hostPath:
+          path: ./html
+      - name: nginx-conf
+        hostPath:
+          path: ./nginx.conf
+      - name: nginx-logs
+        hostPath:
+          path: ./logs/nginx
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aphrodite-db
+  namespace: aphrodite
+spec:
+  ports:
+  - port: 3380
+    targetPort: 3306
+  selector:
+    app: aphrodite-db
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aphrodite-cache
+  namespace: aphrodite
+spec:
+  ports:
+  - port: 6350
+    targetPort: 6379
+  selector:
+    app: aphrodite-cache
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aphrodite-web
+  namespace: aphrodite
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: aphrodite-web
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aphrodite-nginx
+  namespace: aphrodite
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  - port: 443
+    targetPort: 443
+  selector:
+    app: aphrodite-nginx
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aphrodite-network-policy
+  namespace: aphrodite
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector: {}
