@@ -22,6 +22,16 @@ pub async fn login(
     service::auth::login(req).await
 }
 
+#[utoipa::path(
+    post,
+    path = "/logout",
+    responses(
+        (status = 200, description = "Login successful"),
+        (status = 400, description = "Bad Request"),
+        (status = 500, description = "Internal Server Error"),
+    ),
+    tag = "auth",
+)]
 pub async fn logout(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
     if identity.id() == 0 {
         return Ok(ApiOK(None));

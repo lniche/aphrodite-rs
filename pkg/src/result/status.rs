@@ -6,8 +6,7 @@ where
     T: Serialize,
 {
     pub code: i32,
-    pub err: bool,
-    pub msg: String,
+    pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<T>,
 }
@@ -27,18 +26,16 @@ where
     pub fn to_reply(self) -> Reply<T> {
         let mut resp = Reply {
             code: 0,
-            err: false,
-            msg: String::from("OK"),
+            message: String::from("ok"),
             data: None,
         };
         match self {
             Status::OK(data) => {
                 resp.data = data;
             }
-            Status::Err(code, msg) => {
+            Status::Err(code, message) => {
                 resp.code = code;
-                resp.err = true;
-                resp.msg = msg;
+                resp.message = message;
             }
         }
         resp

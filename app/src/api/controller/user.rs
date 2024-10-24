@@ -17,7 +17,7 @@ use pkg::result::{
     response::{ApiErr, ApiOK, Result},
 };
 
-pub async fn create(
+pub async fn register(
     Extension(_identity): Extension<Identity>,
     WithRejection(Json(req), _): IRejection<Json<ReqCreate>>,
 ) -> Result<ApiOK<()>> {

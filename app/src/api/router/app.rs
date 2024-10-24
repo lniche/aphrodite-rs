@@ -16,13 +16,14 @@ use utoipa_swagger_ui::SwaggerUi;
 pub fn init() -> Router {
     // 开放
     let open = Router::new()
-        .route("/login", post(auth::login))
-        .route("/ping", get(health::ping));
+        .route("/login", post(auth::login));
 
     // 需授权
     let auth = Router::new()
+        .route("/login", get(auth::logout))
         .route("/logout", get(auth::logout))
-        .route("/user", get(user::list).post(user::create))
+        .route("/send-code", get(auth::logout))
+        .route("/user", get(user::list).post(user::register))
         .route("/user/:user_id", get(user::info))
         .layer(axum::middleware::from_fn(middleware::auth::handle));
 
@@ -31,13 +32,13 @@ pub fn init() -> Router {
         info(
             title = "Aphrodite",
             version = "1.0.0",
-            description = "Aphrodite-rs Api",
+            description = "Aphrodite API",
         ),
         paths(
-            health::ping
+            auth::logout
         ),
         tags(
-            (name = "health", description = "Basic health check to see if the server is up"),
+            (name = "auth", description = "Basic auth"),
         )
     )]
     struct ApiDoc;
@@ -66,7 +67,8 @@ pub fn init() -> Router {
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
-        .route("/", get(|| async { "☺ welcome to Aphrodite" }))
+        .route("/", get(health::home))
+        .route("/ping", get(health::ping))
         .nest("/v1", open.merge(auth))
         .layer(axum::middleware::from_fn(pkg::middleware::log::handle))
         .layer(axum::middleware::from_fn(pkg::middleware::identity::handle))
