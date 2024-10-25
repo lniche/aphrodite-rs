@@ -13,6 +13,11 @@ use crate::api::service::{
     auth::{ReqLogin, RespLogin},
 };
 
+#[utoipa::path(
+    post,
+    path = "/login",
+    tag = "认证模块"
+)]
 pub async fn login(
     WithRejection(Json(req), _): IRejection<Json<ReqLogin>>,
 ) -> Result<ApiOK<RespLogin>> {
@@ -25,12 +30,7 @@ pub async fn login(
 #[utoipa::path(
     post,
     path = "/logout",
-    responses(
-        (status = 200, description = "Login successful"),
-        (status = 400, description = "Bad Request"),
-        (status = 500, description = "Internal Server Error"),
-    ),
-    tag = "auth",
+    tag = "认证模块"
 )]
 pub async fn logout(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
     if identity.id() == 0 {

@@ -1,13 +1,9 @@
--- ----------------------------
--- Table structure for t_user
--- ----------------------------
-DROP TABLE IF EXISTS "public"."t_user";
 CREATE TABLE "public"."t_user" (
   "user_code" text COLLATE "pg_catalog"."default" NOT NULL,
   "user_no" int8 NOT NULL,
   "username" text COLLATE "pg_catalog"."default",
   "nickname" text COLLATE "pg_catalog"."default",
-  "password" text COLLATE "pg_catalog"."default" NOT NULL,
+  "password" text COLLATE "pg_catalog"."default",
   "salt" text COLLATE "pg_catalog"."default",
   "email" text COLLATE "pg_catalog"."default",
   "phone" text COLLATE "pg_catalog"."default" NOT NULL,
@@ -21,38 +17,42 @@ CREATE TABLE "public"."t_user" (
   "deleted_at" timestamptz(6),
   "created_by" text COLLATE "pg_catalog"."default",
   "updated_by" text COLLATE "pg_catalog"."default",
-  "version" int8 DEFAULT 1,
-  "is_deleted" bool DEFAULT false
+  "version" int4 DEFAULT 1,
+  "is_deleted" bool DEFAULT false,
+  CONSTRAINT "t_user_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "uni_t_user_user_code" UNIQUE ("user_code"),
+  CONSTRAINT "uni_t_user_user_no" UNIQUE ("user_no"),
+  CONSTRAINT "uni_t_user_username" UNIQUE ("username")
 )
 ;
-COMMENT ON COLUMN "public"."t_user"."user_code" IS '用户编码';
-COMMENT ON COLUMN "public"."t_user"."user_no" IS '用户编号';
-COMMENT ON COLUMN "public"."t_user"."username" IS '用户名';
-COMMENT ON COLUMN "public"."t_user"."nickname" IS '昵称';
-COMMENT ON COLUMN "public"."t_user"."password" IS '密码';
-COMMENT ON COLUMN "public"."t_user"."salt" IS '盐值';
-COMMENT ON COLUMN "public"."t_user"."email" IS '邮箱';
-COMMENT ON COLUMN "public"."t_user"."phone" IS '电话';
-COMMENT ON COLUMN "public"."t_user"."open_id" IS '微信OpenID';
-COMMENT ON COLUMN "public"."t_user"."client_ip" IS '客户端IP';
-COMMENT ON COLUMN "public"."t_user"."login_at" IS '登录时间';
-COMMENT ON COLUMN "public"."t_user"."login_token" IS '登录令牌';
 
--- ----------------------------
--- Indexes structure for table t_user
--- ----------------------------
+ALTER TABLE "public"."t_user" 
+  OWNER TO "postgres";
+
 CREATE INDEX "idx_t_user_phone" ON "public"."t_user" USING btree (
   "phone" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
 
--- ----------------------------
--- Uniques structure for table t_user
--- ----------------------------
-ALTER TABLE "public"."t_user" ADD CONSTRAINT "uni_t_user_user_code" UNIQUE ("user_code");
-ALTER TABLE "public"."t_user" ADD CONSTRAINT "uni_t_user_user_no" UNIQUE ("user_no");
-ALTER TABLE "public"."t_user" ADD CONSTRAINT "uni_t_user_username" UNIQUE ("username");
+COMMENT ON COLUMN "public"."t_user"."user_code" IS '用户编码';
 
--- ----------------------------
--- Primary Key structure for table t_user
--- ----------------------------
-ALTER TABLE "public"."t_user" ADD CONSTRAINT "t_user_pkey" PRIMARY KEY ("id");
+COMMENT ON COLUMN "public"."t_user"."user_no" IS '用户编号';
+
+COMMENT ON COLUMN "public"."t_user"."username" IS '用户名';
+
+COMMENT ON COLUMN "public"."t_user"."nickname" IS '昵称';
+
+COMMENT ON COLUMN "public"."t_user"."password" IS '密码';
+
+COMMENT ON COLUMN "public"."t_user"."salt" IS '盐值';
+
+COMMENT ON COLUMN "public"."t_user"."email" IS '邮箱';
+
+COMMENT ON COLUMN "public"."t_user"."phone" IS '电话';
+
+COMMENT ON COLUMN "public"."t_user"."open_id" IS '微信OpenID';
+
+COMMENT ON COLUMN "public"."t_user"."client_ip" IS '客户端IP';
+
+COMMENT ON COLUMN "public"."t_user"."login_at" IS '登录时间';
+
+COMMENT ON COLUMN "public"."t_user"."login_token" IS '登录令牌';

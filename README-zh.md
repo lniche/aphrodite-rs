@@ -52,13 +52,16 @@ Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) �
 ## 模块说明
 
 - app => 应用模块
+  - api => 应用模块
+  - cmd => 应用模块
+  - ent => 应用模块
 - pkg => 公共模块
 
 ## 本地运行
 
 ```bash
 # 数据库
-demo_rs.sql
+deploy/db.sql
 
 # 配置文件
 mv config.toml.example config.toml

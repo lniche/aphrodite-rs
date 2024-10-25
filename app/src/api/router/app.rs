@@ -16,13 +16,13 @@ use utoipa_swagger_ui::SwaggerUi;
 pub fn init() -> Router {
     // 开放
     let open = Router::new()
-        .route("/login", post(auth::login));
+        .route("/login", post(auth::login))
+        .route("/send-code", get(auth::logout))
+    ;
 
     // 需授权
     let auth = Router::new()
-        .route("/login", get(auth::logout))
         .route("/logout", get(auth::logout))
-        .route("/send-code", get(auth::logout))
         .route("/user", get(user::list).post(user::register))
         .route("/user/:user_id", get(user::info))
         .layer(axum::middleware::from_fn(middleware::auth::handle));
@@ -30,15 +30,12 @@ pub fn init() -> Router {
     #[derive(OpenApi)]
     #[openapi(
         info(
-            title = "Aphrodite",
+            title = "Aphrodite API",
             version = "1.0.0",
-            description = "Aphrodite API",
+            description = "API Description",
         ),
         paths(
             auth::logout
-        ),
-        tags(
-            (name = "auth", description = "Basic auth"),
         )
     )]
     struct ApiDoc;
