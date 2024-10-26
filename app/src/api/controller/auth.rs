@@ -1,5 +1,7 @@
 use axum::{Extension, Json};
 use axum_extra::extract::WithRejection;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use validator::Validate;
 
 use pkg::identity::Identity;
@@ -8,15 +10,30 @@ use pkg::result::{
     response::{ApiErr, ApiOK, Result},
 };
 
-use crate::api::service::{
-    self,
-    auth::{ReqLogin, RespLogin},
-};
+use crate::api::service;
+#[derive(Debug, Validate, Deserialize, Serialize, ToSchema)]
+pub struct ReqLogin {
+    #[validate(length(min = 1, message = "用户名必填"))]
+    pub username: String,
+    #[validate(length(min = 1, message = "密码必填"))]
+    pub password: String,
+}
 
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct RespLogin {
+    pub auth_token: String,
+}
+
+/// 用户登录接口
 #[utoipa::path(
     post,
     path = "/login",
-    tag = "认证模块"
+    tag = "认证模块",
+    request_body = ReqLogin,
+    responses(
+        (status = 200, description = "获取用户信息成功", body = RespLogin)
+    ),
+    description = "用户登录接口，用于用户通过用户名和密码进行身份验证，成功后返回认证 token。"
 )]
 pub async fn login(
     WithRejection(Json(req), _): IRejection<Json<ReqLogin>>,
@@ -27,10 +44,15 @@ pub async fn login(
     service::auth::login(req).await
 }
 
+/// 用户退出登录接口
 #[utoipa::path(
     post,
     path = "/logout",
-    tag = "认证模块"
+    tag = "认证模块",
+    security(
+        ("bearer_auth" = []) 
+    ),
+    description = "用户退出登录接口，用于清除用户的认证 token，确保后续操作需要重新认证。"
 )]
 pub async fn logout(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
     if identity.id() == 0 {

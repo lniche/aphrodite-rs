@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "Aphrodite API",
     "description": "API Description",
@@ -10,17 +10,64 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000"
+      "url": "http://127.0.0.1:8000"
     }
   ],
   "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "认证模块"
+        ],
+        "summary": "用户登录接口",
+        "description": "用户登录接口，用于用户通过用户名和密码进行身份验证，成功后返回认证 token。",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReqLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "获取用户信息成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespLogin"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/logout": {
       "post": {
         "tags": [
           "认证模块"
         ],
+        "summary": "用户退出登录接口",
+        "description": "用户退出登录接口，用于清除用户的认证 token，确保后续操作需要重新认证。",
         "operationId": "logout",
-        "responses": {}
+        "responses": {},
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer_auth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

@@ -1,30 +1,16 @@
 use chrono::Utc;
 use sea_orm::sea_query::Expr;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set};
-use serde::{Deserialize, Serialize};
 use time::macros::offset;
-use validator::Validate;
 
 use pkg::crypto::hash::md5;
 use pkg::identity::Identity;
 use pkg::result::response::{ApiErr, ApiOK, Result};
 use pkg::{db, util, xtime};
 
-use crate::ent::user;
+use crate::api::controller::auth::{ReqLogin, RespLogin};
 use crate::ent::prelude::Account;
-
-#[derive(Debug, Validate, Deserialize, Serialize)]
-pub struct ReqLogin {
-    #[validate(length(min = 1, message = "用户名必填"))]
-    pub username: String,
-    #[validate(length(min = 1, message = "密码必填"))]
-    pub password: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct RespLogin {
-    pub auth_token: String,
-}
+use crate::ent::user;
 
 pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
     let model = Account::find()
@@ -66,9 +52,7 @@ pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
         return Err(ApiErr::ErrSystem(None));
     }
 
-    let resp = RespLogin {
-        auth_token,
-    };
+    let resp = RespLogin { auth_token };
 
     Ok(ApiOK(Some(resp)))
 }

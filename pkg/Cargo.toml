@@ -1,6 +1,6 @@
 [package]
 name = "pkg"
-version = "1.2.3"
+version = "1.0.0"
 edition = "2021"
 description = "Package"
 
@@ -44,7 +44,7 @@ axum-extra = "0.9"
 nanoid = "0.4"
 validator = { version = "0.16", features = ["derive"] }
 sea-orm = { version = "0.12", features = [
-    "sqlx-mysql",
+    "sqlx-postgres",
     "runtime-tokio-rustls",
     "macros",
     "debug-print",

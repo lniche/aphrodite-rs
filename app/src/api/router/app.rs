@@ -1,5 +1,6 @@
+use crate::api::controller::auth::{ReqLogin, RespLogin};
 use crate::api::{
-    controller::{user, auth, health},
+    controller::{auth, health, user},
     middleware,
 };
 use axum::{
@@ -9,6 +10,7 @@ use axum::{
     Router,
 };
 use tower_http::trace::TraceLayer;
+use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::{OpenApiBuilder, ServerBuilder};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -17,8 +19,7 @@ pub fn init() -> Router {
     // 开放
     let open = Router::new()
         .route("/login", post(auth::login))
-        .route("/send-code", get(auth::logout))
-    ;
+        .route("/send-code", get(auth::logout));
 
     // 需授权
     let auth = Router::new()
@@ -34,9 +35,8 @@ pub fn init() -> Router {
             version = "1.0.0",
             description = "API Description",
         ),
-        paths(
-            auth::logout
-        )
+        paths(auth::login, auth::logout,),
+        components(schemas(ReqLogin, RespLogin))
     )]
     struct ApiDoc;
 
@@ -52,7 +52,19 @@ pub fn init() -> Router {
         // Take note that the sever that you want to expose should be here else don't include it
         let servers = vec![server];
         let builder: OpenApiBuilder = ApiDoc::openapi().into();
-        let openapi = builder.servers(Some(servers)).build();
+        let openapi = builder
+            .servers(Some(servers))
+            .components(Some(
+                utoipa::openapi::ComponentsBuilder::new()
+                    .security_scheme(
+                        "bearer_auth",
+                        SecurityScheme::Http(
+                            HttpBuilder::new().scheme(HttpAuthScheme::Bearer).build(),
+                        ),
+                    )
+                    .build(),
+            ))
+            .build();
 
         std::fs::write("./docs/openapi.json", openapi.to_pretty_json().unwrap())
             .expect("Unable to create file");
@@ -60,7 +72,7 @@ pub fn init() -> Router {
         openapi
     }
 
-    let openapi = generate_openapi_json("http://localhost:8000".parse().unwrap());
+    let openapi = generate_openapi_json("http://127.0.0.1:8000".parse().unwrap());
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
