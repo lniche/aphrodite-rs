@@ -64,6 +64,40 @@
     }
   },
   "components": {
+    "schemas": {
+      "ReqLogin": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "用户的密码",
+            "example": "password123"
+          },
+          "username": {
+            "type": "string",
+            "description": "登录的用户名",
+            "example": "user123"
+          }
+        }
+      },
+      "RespLogin": {
+        "type": "object",
+        "required": [
+          "auth_token"
+        ],
+        "properties": {
+          "auth_token": {
+            "type": "string",
+            "description": "用于验证身份的 JWT token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "bearer_auth": {
         "type": "http",

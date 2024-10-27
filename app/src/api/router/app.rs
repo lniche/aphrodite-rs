@@ -11,7 +11,7 @@ use axum::{
 };
 use tower_http::trace::TraceLayer;
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
-use utoipa::openapi::{OpenApiBuilder, ServerBuilder};
+use utoipa::openapi::{ComponentsBuilder, OpenApiBuilder, ServerBuilder};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -36,7 +36,7 @@ pub fn init() -> Router {
             description = "API Description",
         ),
         paths(auth::login, auth::logout,),
-        components(schemas(ReqLogin, RespLogin))
+        // components(schemas(ReqLogin, RespLogin))
     )]
     struct ApiDoc;
 
@@ -55,7 +55,9 @@ pub fn init() -> Router {
         let openapi = builder
             .servers(Some(servers))
             .components(Some(
-                utoipa::openapi::ComponentsBuilder::new()
+                ComponentsBuilder::new()
+                    .schema_from::<ReqLogin>()
+                    .schema_from::<RespLogin>()
                     .security_scheme(
                         "bearer_auth",
                         SecurityScheme::Http(

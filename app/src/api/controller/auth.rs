@@ -13,14 +13,21 @@ use pkg::result::{
 use crate::api::service;
 #[derive(Debug, Validate, Deserialize, Serialize, ToSchema)]
 pub struct ReqLogin {
+    /// 登录的用户名
     #[validate(length(min = 1, message = "用户名必填"))]
+    #[schema(example = "user123")]
     pub username: String,
+
+    /// 用户的密码
     #[validate(length(min = 1, message = "密码必填"))]
+    #[schema(example = "password123")]
     pub password: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct RespLogin {
+    /// 用于验证身份的 JWT token
+    #[schema(example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")]
     pub auth_token: String,
 }
 

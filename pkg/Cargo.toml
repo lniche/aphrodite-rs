@@ -55,3 +55,4 @@ redis = { version = "0.25", features = [
     "cluster-async",
     "tokio-comp",
 ] }
+utoipa = { version = "5.1.2", features = ["axum_extras"] }
