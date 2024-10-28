@@ -46,5 +46,6 @@ redis = { version = "0.23", features = [
 utoipa = { version = "5.1.2", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
 chrono = "0.4"
+rand = "0.8"
 # workspace modules
 pkg = { path = "../pkg" }

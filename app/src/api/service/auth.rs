@@ -8,11 +8,13 @@ use pkg::identity::Identity;
 use pkg::result::response::{ApiErr, ApiOK, Result};
 use pkg::{db, util, xtime};
 
-use crate::api::controller::auth::{ReqLogin, RespLogin};
+use crate::api::controller::auth::{LoginReq, LoginResp, SendVerifyCodeReq, SendVerifyCodeResp};
 use crate::ent::prelude::Account;
 use crate::ent::user;
 
-pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
+use rand::Rng;
+
+pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
     let model = Account::find()
         .filter(user::Column::Username.eq(req.username))
         .one(db::conn())
@@ -52,7 +54,7 @@ pub async fn login(req: ReqLogin) -> Result<ApiOK<RespLogin>> {
         return Err(ApiErr::ErrSystem(None));
     }
 
-    let resp = RespLogin { auth_token };
+    let resp = LoginResp { auth_token };
 
     Ok(ApiOK(Some(resp)))
 }
@@ -74,4 +76,12 @@ pub async fn logout(identity: Identity) -> Result<ApiOK<()>> {
     }
 
     Ok(ApiOK(None))
+}
+pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<ApiOK<SendVerifyCodeResp>> {
+    let code: u32 = rand::thread_rng().gen_range(1000..10000);
+    let code_str = code.to_string(); // 将 code 转换为字符串
+    
+    let resp = SendVerifyCodeResp { code:code_str };
+
+    Ok(ApiOK(Some(resp)))
 }

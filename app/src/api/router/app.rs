@@ -1,4 +1,4 @@
-use crate::api::controller::auth::{ReqLogin, RespLogin};
+use crate::api::controller::auth::{LoginReq, LoginResp};
 use crate::api::{
     controller::{auth, health, user},
     middleware,
@@ -56,8 +56,8 @@ pub fn init() -> Router {
             .servers(Some(servers))
             .components(Some(
                 ComponentsBuilder::new()
-                    .schema_from::<ReqLogin>()
-                    .schema_from::<RespLogin>()
+                    .schema_from::<LoginReq>()
+                    .schema_from::<LoginResp>()
                     .security_scheme(
                         "bearer_auth",
                         SecurityScheme::Http(
