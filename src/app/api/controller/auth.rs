@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-use pkg::identity::Identity;
-use pkg::result::{
+use crate::pkg::identity::Identity;
+use crate::pkg::result::{
     rejection::IRejection,
     response::{ApiErr, ApiOK, Result},
 };

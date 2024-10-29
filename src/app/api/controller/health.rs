@@ -1,4 +1,4 @@
-use pkg::result::response::{ ApiOK, Result};
+use crate::pkg::result::response::{ ApiOK, Result};
 
 pub async fn ping() -> Result<ApiOK<String>> {
     Ok(ApiOK(Some("pong".to_string())))

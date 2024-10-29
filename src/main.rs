@@ -4,6 +4,9 @@ use clap::Parser;
 use pkg::{cache, config, db, logger};
 use tracing_appender::non_blocking::WorkerGuard;
 
+pub mod app;
+pub mod pkg;
+
 #[tokio::main]
 async fn main() {
     let cli = cmd::Cli::parse();

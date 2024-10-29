@@ -81,9 +81,9 @@ pub fn init() -> Router {
         .route("/", get(health::home))
         .route("/ping", get(health::ping))
         .nest("/v1", open.merge(auth))
-        .layer(axum::middleware::from_fn(pkg::middleware::log::handle))
-        .layer(axum::middleware::from_fn(pkg::middleware::identity::handle))
-        .layer(axum::middleware::from_fn(pkg::middleware::cors::handle))
+        .layer(axum::middleware::from_fn(crate::pkg::middleware::log::handle))
+        .layer(axum::middleware::from_fn(crate::pkg::middleware::identity::handle))
+        .layer(axum::middleware::from_fn(crate::pkg::middleware::cors::handle))
         .layer(
             TraceLayer::new_for_http().make_span_with(|request: &Request<Body>| {
                 let req_id = match request
@@ -98,5 +98,5 @@ pub fn init() -> Router {
                 tracing::error_span!("request_id", id = req_id)
             }),
         )
-        .layer(axum::middleware::from_fn(pkg::middleware::req_id::handle))
+        .layer(axum::middleware::from_fn(crate::pkg::middleware::req_id::handle))
 }

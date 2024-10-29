@@ -1,11 +1,11 @@
 use anyhow::anyhow;
 use anyhow::Result;
-use pkg::config;
-use pkg::db;
-use pkg::identity::Identity;
+use crate::pkg::config;
+use crate::pkg::db;
+use crate::pkg::identity::Identity;
 use sea_orm::EntityTrait;
 
-use crate::ent::prelude::Account;
+use crate::app::ent::prelude::Account;
 
 pub mod controller;
 pub mod middleware;

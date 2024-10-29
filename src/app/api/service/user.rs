@@ -6,14 +6,14 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use pkg::{
+use crate::pkg::{
     crypto::hash::md5,
     db,
     result::response::{ApiErr, ApiOK, Result},
     util,
 };
 
-use crate::ent::{user, prelude::Account};
+use crate::app::ent::{user, prelude::Account};
 use chrono::{NaiveDateTime, Utc};
 
 

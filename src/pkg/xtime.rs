@@ -64,7 +64,7 @@ pub fn to_timestamp(fmt: &str, datetime: &str, offset: time::UtcOffset) -> anyho
 mod tests {
     use ::time::macros::offset;
 
-    use crate::xtime;
+    use crate::pkg::xtime;
 
     #[test]
     fn from_str() {

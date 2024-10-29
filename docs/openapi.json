@@ -14,19 +14,18 @@
     }
   ],
   "paths": {
-    "/login": {
+    "/v1/login": {
       "post": {
         "tags": [
           "认证模块"
         ],
-        "summary": "用户登录接口",
-        "description": "用户登录接口，用于用户通过用户名和密码进行身份验证，成功后返回认证 token。",
+        "description": "用户登录接口",
         "operationId": "login",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReqLogin"
+                "$ref": "#/components/schemas/LoginReq"
               }
             }
           },
@@ -38,7 +37,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RespLogin"
+                  "$ref": "#/components/schemas/LoginResp"
                 }
               }
             }
@@ -46,13 +45,12 @@
         }
       }
     },
-    "/logout": {
+    "/v1/logout": {
       "post": {
         "tags": [
           "认证模块"
         ],
-        "summary": "用户退出登录接口",
-        "description": "用户退出登录接口，用于清除用户的认证 token，确保后续操作需要重新认证。",
+        "description": "用户退出登录接口",
         "operationId": "logout",
         "responses": {},
         "security": [
@@ -65,7 +63,7 @@
   },
   "components": {
     "schemas": {
-      "ReqLogin": {
+      "LoginReq": {
         "type": "object",
         "required": [
           "username",
@@ -74,17 +72,15 @@
         "properties": {
           "password": {
             "type": "string",
-            "description": "用户的密码",
             "example": "password123"
           },
           "username": {
             "type": "string",
-            "description": "登录的用户名",
             "example": "user123"
           }
         }
       },
-      "RespLogin": {
+      "LoginResp": {
         "type": "object",
         "required": [
           "auth_token"
@@ -92,7 +88,6 @@
         "properties": {
           "auth_token": {
             "type": "string",
-            "description": "用于验证身份的 JWT token",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
         }

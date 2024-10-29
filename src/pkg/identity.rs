@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fmt::Display;
 
-use crate::{config, crypto::aes::CBC};
+use crate::{config, pkg::crypto::aes::CBC};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Identity {

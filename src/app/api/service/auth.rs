@@ -3,14 +3,14 @@ use sea_orm::sea_query::Expr;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set};
 use time::macros::offset;
 
-use pkg::crypto::hash::md5;
-use pkg::identity::Identity;
-use pkg::result::response::{ApiErr, ApiOK, Result};
-use pkg::{db, util, xtime};
+use crate::pkg::crypto::hash::md5;
+use crate::pkg::identity::Identity;
+use crate::pkg::result::response::{ApiErr, ApiOK, Result};
+use crate::pkg::{db, util, xtime};
 
 use crate::api::controller::auth::{LoginReq, LoginResp, SendVerifyCodeReq, SendVerifyCodeResp};
-use crate::ent::prelude::Account;
-use crate::ent::user;
+use crate::app::ent::prelude::Account;
+use crate::app::ent::user;
 
 use rand::Rng;
 
