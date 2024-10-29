@@ -4,10 +4,10 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::pkg::identity::Identity;
+use crate::pkg::util::identity::Identity;
 use crate::pkg::result::response::ApiErr;
 
-use crate::api::auth_check;
+use crate::app::middleware::auth_check;
 
 pub async fn handle(request: Request, next: Next) -> Response {
     let identity = request.extensions().get::<Identity>();

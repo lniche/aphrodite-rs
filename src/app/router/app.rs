@@ -1,6 +1,6 @@
-use crate::api::controller::auth::{LoginReq, LoginResp};
-use crate::api::{
-    controller::{auth, health, user},
+use crate::app::api::auth::{LoginReq, LoginResp};
+use crate::app::{
+    api::{auth, health, user},
     middleware,
 };
 use axum::{

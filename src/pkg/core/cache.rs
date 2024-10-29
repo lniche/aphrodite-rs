@@ -1,4 +1,5 @@
 use config::Config;
+use redis::Commands;
 use std::io;
 use std::{sync::OnceLock, time::Duration};
 
@@ -206,4 +207,52 @@ impl mobc::Manager for RedisClusterAsyncConnManager {
         }
         Ok(conn)
     }
+}
+
+pub struct RedisClient;
+
+impl RedisClient {
+    pub fn get(key: &str) -> Result<String, redis::RedisError> {
+        let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
+        let mut conn = pool.get().map_err(|e| {
+            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+        })?;
+        let value: String = conn.get(key)?;
+        Ok(value) 
+    }
+    pub fn set(key: &str, value: &str, expire: Option<u64>) -> Result<(), redis::RedisError> {
+        let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
+        let mut conn = pool.get().map_err(|e| {
+            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+        })?;
+        
+        // 使用 SET 命令带上过期时间
+        match expire {
+            Some(seconds) => {
+                conn.set_ex::<&str, &str, ()>(key, value, seconds)?;
+            }
+            None => {
+                conn.set::<&str, &str, ()>(key, value)?;
+            }
+        }
+        
+        Ok(())
+    }
+    pub fn has_key(key: &str) -> Result<bool, redis::RedisError> {
+        let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
+        let mut conn = pool.get().map_err(|e| {
+            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+        })?;
+        let exists: bool = conn.exists(key)?;
+        Ok(exists)
+    }
+    pub fn expire(key: &str, seconds: i64) -> Result<(), redis::RedisError> {
+        let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
+        let mut conn = pool.get().map_err(|e| {
+            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+        })?;
+        conn.expire::<&str, i64>(key, seconds)?;
+        Ok(())
+    }    
+    
 }

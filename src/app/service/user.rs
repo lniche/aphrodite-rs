@@ -8,12 +8,12 @@ use validator::Validate;
 
 use crate::pkg::{
     crypto::hash::md5,
-    db,
+    core::db,
     result::response::{ApiErr, ApiOK, Result},
-    util,
+    util::util,
 };
 
-use crate::app::ent::{user, prelude::Account};
+use crate::app::model::{user, prelude::Account};
 use chrono::{NaiveDateTime, Utc};
 
 

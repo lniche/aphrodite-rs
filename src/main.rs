@@ -1,7 +1,7 @@
 use app::api;
 use app::cmd;
 use clap::Parser;
-use pkg::{cache, config, db, logger};
+use pkg::core::{cache, config, db, logger};
 use tracing_appender::non_blocking::WorkerGuard;
 
 pub mod app;
@@ -16,7 +16,7 @@ async fn main() {
     if let Some(v) = cli.command {
         match v {
             cmd::Command::Hello { name } => cmd::hello::exec(name),
-            cmd::Command::Serve => api::serve().await,
+            cmd::Command::Serve => app::serve().await,
         }
     }
 }

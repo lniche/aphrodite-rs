@@ -22,6 +22,6 @@
 *.log
 *.log.*
 
-.env
-*.http
+deploy/docker-compose/data
+deploy/docker-compose/logs
 config.toml

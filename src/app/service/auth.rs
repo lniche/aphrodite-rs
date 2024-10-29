@@ -4,13 +4,13 @@ use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set};
 use time::macros::offset;
 
 use crate::pkg::crypto::hash::md5;
-use crate::pkg::identity::Identity;
+use crate::pkg::util::{identity::Identity,util,xtime};
 use crate::pkg::result::response::{ApiErr, ApiOK, Result};
-use crate::pkg::{db, util, xtime};
+use crate::pkg::core::{cache,db };
 
-use crate::api::controller::auth::{LoginReq, LoginResp, SendVerifyCodeReq, SendVerifyCodeResp};
-use crate::app::ent::prelude::Account;
-use crate::app::ent::user;
+use crate::api::auth::{LoginReq, LoginResp, SendVerifyCodeReq, SendVerifyCodeResp};
+use crate::app::model::prelude::Account;
+use crate::app::model::user;
 
 use rand::Rng;
 
@@ -80,7 +80,7 @@ pub async fn logout(identity: Identity) -> Result<ApiOK<()>> {
 pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<ApiOK<SendVerifyCodeResp>> {
     let code: u32 = rand::thread_rng().gen_range(1000..10000);
     let code_str = code.to_string(); // 将 code 转换为字符串
-    
+    let _ = cache::RedisClient::get("key");
     let resp = SendVerifyCodeResp { code:code_str };
 
     Ok(ApiOK(Some(resp)))

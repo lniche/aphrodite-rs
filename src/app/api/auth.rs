@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-use crate::pkg::identity::Identity;
+use crate::pkg::util::identity::Identity;
 use crate::pkg::result::{
     rejection::IRejection,
     response::{ApiErr, ApiOK, Result},
 };
 
-use crate::api::service;
+use crate::app::service;
 #[derive(Debug, Validate, Deserialize, Serialize, ToSchema)]
 pub struct LoginReq {
     // 登录的用户名
