@@ -8,19 +8,19 @@ use crate::pkg::util::{identity::Identity,util,xtime};
 use crate::pkg::result::response::{ApiErr, ApiOK, Result};
 use crate::pkg::core::{cache,db };
 
-use crate::api::auth::{LoginReq, LoginResp, SendVerifyCodeReq, SendVerifyCodeResp};
-use crate::app::model::prelude::Account;
+use crate::api::auth::{LoginReq, LoginResp, SendVerifyCodeReq};
+use crate::app::model::prelude::User;
 use crate::app::model::user;
 
 use rand::Rng;
 
 pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
-    let model = Account::find()
+    let model = User::find()
         .filter(user::Column::Username.eq(req.username))
         .one(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error find account");
+            tracing::error!(error = ?e, "error find user");
             ApiErr::ErrSystem(None)
         })?
         .ok_or(ApiErr::ErrAuth(Some("账号不存在".to_string())))?;
@@ -44,13 +44,13 @@ pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
         updated_at: Set(now),
         ..Default::default()
     };
-    let ret_update = Account::update_many()
+    let ret_update = User::update_many()
         .filter(user::Column::Id.eq(model.id))
         .set(update_model)
         .exec(db::conn())
         .await;
     if let Err(e) = ret_update {
-        tracing::error!(error = ?e, "error update account");
+        tracing::error!(error = ?e, "error update user");
         return Err(ApiErr::ErrSystem(None));
     }
 
@@ -60,7 +60,7 @@ pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
 }
 
 pub async fn logout(identity: Identity) -> Result<ApiOK<()>> {
-    let ret = Account::update_many()
+    let ret = User::update_many()
         .filter(user::Column::Id.eq(identity.id()))
         .col_expr(user::Column::LoginToken, Expr::value(""))
         .col_expr(
@@ -71,17 +71,27 @@ pub async fn logout(identity: Identity) -> Result<ApiOK<()>> {
         .await;
 
     if let Err(e) = ret {
-        tracing::error!(error = ?e, "error update account");
+        tracing::error!(error = ?e, "error update user");
         return Err(ApiErr::ErrSystem(None));
     }
 
     Ok(ApiOK(None))
 }
-pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<ApiOK<SendVerifyCodeResp>> {
-    let code: u32 = rand::thread_rng().gen_range(1000..10000);
-    let code_str = code.to_string(); // 将 code 转换为字符串
-    let _ = cache::RedisClient::get("key");
-    let resp = SendVerifyCodeResp { code:code_str };
 
-    Ok(ApiOK(Some(resp)))
+pub const SEND_CODE_KEY: &str = "send:code:";
+
+pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<ApiOK<()>> {
+    let code: u32 = rand::thread_rng().gen_range(1000..10000);
+    let code_str = code.to_string();
+    tracing::debug!( "send verify code {} {}", code_str, req.phone);
+    let redis_key = format!("{}{}", SEND_CODE_KEY, req.phone);
+    let _ = cache::RedisClient::set(&redis_key,&code_str,Some(60));
+
+    match cache::RedisClient::set(&redis_key, &code_str, Some(60)) {
+        Ok(_) => Ok(ApiOK(None)),
+        Err(e) => {
+            tracing::error!("Failed to set value in Redis: {:?}", e);
+            Err(ApiErr::ErrSystem(None)) // 自定义错误处理
+        }
+    }
 }

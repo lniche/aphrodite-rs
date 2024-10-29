@@ -76,28 +76,17 @@ pub struct SendVerifyCodeReq {
     pub phone: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
-pub struct SendVerifyCodeResp {
-    // 验证码
-    #[schema(example = "1234")]
-    pub code: String,
-}
-
-
 // 发送验证码
 #[utoipa::path(
     post,
     path = "/v1/send-code",
     tag = "认证模块",
     request_body = SendVerifyCodeReq,
-    responses(
-        (status = 200, description = "发送验证码成功", body = SendVerifyCodeResp)
-    ),
     description = "发送校验短信"
 )]
 pub async fn send_verify_code(
     WithRejection(Json(req), _): IRejection<Json<SendVerifyCodeReq>>,
-) -> Result<ApiOK<SendVerifyCodeResp>> {
+) -> Result<ApiOK<()>> {
     if let Err(e) = req.validate() {
         return Err(ApiErr::ErrParams(Some(e.to_string())));
     }
