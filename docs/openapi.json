@@ -86,27 +86,27 @@
       "LoginReq": {
         "type": "object",
         "required": [
-          "username",
-          "password"
+          "phone",
+          "code"
         ],
         "properties": {
-          "password": {
+          "code": {
             "type": "string",
-            "example": "password123"
+            "example": "1234"
           },
-          "username": {
+          "phone": {
             "type": "string",
-            "example": "user123"
+            "example": "13800138000"
           }
         }
       },
       "LoginResp": {
         "type": "object",
         "required": [
-          "auth_token"
+          "access_token"
         ],
         "properties": {
-          "auth_token": {
+          "access_token": {
             "type": "string",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
