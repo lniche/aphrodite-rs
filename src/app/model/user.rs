@@ -5,19 +5,22 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "t_user")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub id: u64,
-    pub user_no: u64,
+    #[sea_orm(unique)]
     pub user_code: String,
     #[sea_orm(unique)]
+    pub user_no: u64,
     pub username: String,
     pub nickname: String,
     pub password: String,
     pub salt: String,
     pub email: String,
+    #[sea_orm(index)]
     pub phone: String,
+    pub client_ip: String,
     pub login_at: DateTime,
     pub login_token: String,
+    #[sea_orm(primary_key)]
+    pub id: u64,
     pub created_at: DateTime,
     pub updated_at: DateTime,
     pub deleted_at: DateTime,

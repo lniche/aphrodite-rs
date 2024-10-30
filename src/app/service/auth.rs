@@ -6,6 +6,7 @@ use time::macros::offset;
 use crate::pkg::core::{cache, db};
 use crate::pkg::crypto::hash::md5;
 use crate::pkg::result::response::{ApiErr, ApiOK, Result};
+use crate::pkg::util::snowflake::SnowflakeGen;
 use crate::pkg::util::{helper, identity::Identity, xtime};
 
 use crate::api::auth::{LoginReq, LoginResp, SendVerifyCodeReq};
@@ -24,50 +25,74 @@ pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
         }
     };
     if cache_code != req.code {
-        return Err(ApiErr::ErrSystem(None));
+        return Err(ApiErr::ErrSystem(Some("验证码不正确".to_string())));
     }
-
-    let count = User::find()
+    let user_option = User::find()
         .filter(user::Column::Phone.eq(req.phone.clone()))
-        .count(db::conn())
+        .one(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error find user");
+            tracing::error!(error = ?e, "Failed to retrieve user information");
             ApiErr::ErrSystem(None)
         })?;
-    if count > 0 {
-        
-    }else{
-
-    }
 
     let now = Utc::now().naive_utc();
-    let login_token =
-        md5(format!("auth.{}.{}.{}", model.user_code, now, helper::nonce(16)).as_bytes());
-    let access_token = Identity::new(model.user_code.clone(), login_token.clone())
-        .to_auth_token()
-        .map_err(|e| {
-            tracing::error!(error = ?e, "error identity encrypt");
+    let login_token: String;
+    let user_code: String;
+
+    if let Some(user) = user_option {
+        user_code = user.user_code.clone();
+        login_token = md5(format!("auth.{}.{}.{}", user_code, now, helper::nonce(16)).as_bytes());
+        let update_model = user::ActiveModel {
+            login_at: Set(now),
+            login_token: Set(login_token.clone()),
+            ..Default::default()
+        };
+
+        User::update_many()
+            .filter(user::Column::UserCode.eq(user.user_code.clone()))
+            .set(update_model)
+            .exec(db::conn())
+            .await
+            .map_err(|e| {
+                tracing::error!(error = ?e, "Failed to update user");
+                ApiErr::ErrSystem(None)
+            })?;
+    } else {
+        let mut generator = SnowflakeGen::new(1);
+        user_code = generator.next().to_string();
+        login_token = md5(format!("auth.{}.{}.{}", user_code, now, helper::nonce(16)).as_bytes());
+        let user_no = cache::RedisClient::next_no().map_err(|e| {
+            tracing::error!(error = ?e, "Failed to generate user_no");
             ApiErr::ErrSystem(None)
         })?;
-    let update_model = user::ActiveModel {
-        login_at: Set(now),
-        login_token: Set(login_token),
-        updated_at: Set(now),
-        ..Default::default()
-    };
-    let ret_update = User::update_many()
-        .filter(user::Column::UserCode.eq(model.user_code))
-        .set(update_model)
-        .exec(db::conn())
-        .await;
-    if let Err(e) = ret_update {
-        tracing::error!(error = ?e, "error update user");
-        return Err(ApiErr::ErrSystem(None));
+
+        let new_user = user::ActiveModel {
+            phone: Set(req.phone.clone()),
+            user_code: Set(user_code.clone()),
+            user_no: Set(user_no),
+            client_ip: Set(user_code.clone()),
+            login_token: Set(login_token.clone()),
+            login_at: Set(now),
+            ..Default::default()
+        };
+
+        User::insert(new_user).exec(db::conn()).await.map_err(|e| {
+            tracing::error!(error = ?e, "Failed to create user");
+            ApiErr::ErrSystem(None)
+        })?;
     }
 
-    let resp = LoginResp { access_token };
+    // 生成 access_token
+    let access_token = Identity::new(req.phone.clone(), login_token.clone())
+        .to_auth_token()
+        .map_err(|e| {
+            tracing::error!(error = ?e, "Failed to encrypt identity");
+            ApiErr::ErrSystem(None)
+        })?;
 
+    // 返回成功响应
+    let resp = LoginResp { access_token };
     Ok(ApiOK(Some(resp)))
 }
 

@@ -212,20 +212,60 @@ impl mobc::Manager for RedisClusterAsyncConnManager {
 pub struct RedisClient;
 
 impl RedisClient {
+    pub fn next_no() -> Result<u64, redis::RedisError> {
+        let key = "next:uno:";
+        let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
+        let mut conn = pool.get().map_err(|e| {
+            redis::RedisError::from((
+                redis::ErrorKind::IoError,
+                "Failed to get connection from pool",
+                e.to_string(),
+            ))
+        })?;
+        let exists: bool = conn.exists(key)?;
+        if !exists {
+            conn.set(key, 100000)?;
+        }
+
+        let value: u64 = conn.incr(key, 1)?;
+        Ok(value)
+    }
+
+    pub fn incr(key: &str) -> Result<i64, redis::RedisError> {
+        let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
+        let mut conn = pool.get().map_err(|e| {
+            redis::RedisError::from((
+                redis::ErrorKind::IoError,
+                "Failed to get connection from pool",
+                e.to_string(),
+            ))
+        })?;
+        let value: i64 = conn.incr(key, 1)?;
+        Ok(value)
+    }
+
     pub fn get(key: &str) -> Result<String, redis::RedisError> {
         let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
         let mut conn = pool.get().map_err(|e| {
-            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+            redis::RedisError::from((
+                redis::ErrorKind::IoError,
+                "Failed to get connection from pool",
+                e.to_string(),
+            ))
         })?;
         let value: String = conn.get(key)?;
-        Ok(value) 
+        Ok(value)
     }
     pub fn set(key: &str, value: &str, expire: Option<u64>) -> Result<(), redis::RedisError> {
         let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
         let mut conn = pool.get().map_err(|e| {
-            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+            redis::RedisError::from((
+                redis::ErrorKind::IoError,
+                "Failed to get connection from pool",
+                e.to_string(),
+            ))
         })?;
-        
+
         // 使用 SET 命令带上过期时间
         match expire {
             Some(seconds) => {
@@ -235,13 +275,17 @@ impl RedisClient {
                 conn.set::<&str, &str, ()>(key, value)?;
             }
         }
-        
+
         Ok(())
     }
     pub fn has_key(key: &str) -> Result<bool, redis::RedisError> {
         let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
         let mut conn = pool.get().map_err(|e| {
-            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+            redis::RedisError::from((
+                redis::ErrorKind::IoError,
+                "Failed to get connection from pool",
+                e.to_string(),
+            ))
         })?;
         let exists: bool = conn.exists(key)?;
         Ok(exists)
@@ -249,10 +293,13 @@ impl RedisClient {
     pub fn expire(key: &str, seconds: i64) -> Result<(), redis::RedisError> {
         let pool = REDIS_POOL.get().expect("Failed to get Redis pool");
         let mut conn = pool.get().map_err(|e| {
-            redis::RedisError::from((redis::ErrorKind::IoError, "Failed to get connection from pool", e.to_string()))
+            redis::RedisError::from((
+                redis::ErrorKind::IoError,
+                "Failed to get connection from pool",
+                e.to_string(),
+            ))
         })?;
         conn.expire::<&str, i64>(key, seconds)?;
         Ok(())
-    }    
-    
+    }
 }
