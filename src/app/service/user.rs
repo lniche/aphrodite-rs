@@ -10,7 +10,7 @@ use crate::pkg::{
     crypto::hash::md5,
     core::db,
     result::response::{ApiErr, ApiOK, Result},
-    util::util,
+    util::helper,
 };
 
 use crate::app::model::{user, prelude::User};
@@ -38,7 +38,7 @@ pub async fn create(req: ReqCreate) -> Result<ApiOK<()>> {
         return Err(ApiErr::ErrPerm(Some("该用户名已被使用".to_string())));
     }
 
-    let salt = util::nonce(16);
+    let salt = helper::nonce(16);
     let pass = format!("{}{}", req.password, salt);
     let now = Utc::now().naive_utc();
     let model = user::ActiveModel {
@@ -101,7 +101,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
     }
 
     let mut total: i64 = 0;
-    let (offset, limit) = util::query_page(&query);
+    let (offset, limit) = helper::query_page(&query);
     // 仅在第一页计算数量
     if offset == 0 {
         total = builder

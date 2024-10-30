@@ -16,5 +16,5 @@ pub async fn serve() {
 
     tracing::info!("listening on {}", addr);
 
-    axum::serve(listener, router::app::init()).await.unwrap();
+    axum::serve(listener, router::init()).await.unwrap();
 }

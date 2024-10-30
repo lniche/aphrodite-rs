@@ -59,6 +59,26 @@
           }
         ]
       }
+    },
+    "/v1/send-code": {
+      "post": {
+        "tags": [
+          "认证模块"
+        ],
+        "description": "发送校验短信",
+        "operationId": "send_verify_code",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendVerifyCodeReq"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -89,6 +109,18 @@
           "auth_token": {
             "type": "string",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "SendVerifyCodeReq": {
+        "type": "object",
+        "required": [
+          "phone"
+        ],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "13800138000"
           }
         }
       }
