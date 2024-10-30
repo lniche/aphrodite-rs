@@ -8,21 +8,18 @@ use crate::{config, pkg::crypto::aes::CBC};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Identity {
-    i: u64,
+    i: String,
     t: String,
 }
 
 impl Identity {
-    pub fn new(id: u64, token: String) -> Self {
-        Self {
-            i: id,
-            t: token,
-        }
+    pub fn new(code: String, token: String) -> Self {
+        Self { i: code, t: token }
     }
 
     pub fn empty() -> Self {
         Self {
-            i: 0,
+            i: String::from(""),
             t: String::from(""),
         }
     }
@@ -70,19 +67,18 @@ impl Identity {
         Ok(BASE64_STANDARD.encode(cipher))
     }
 
-    pub fn id(&self) -> u64 {
-        self.i
+    pub fn code(&self) -> String {
+        self.i.clone()
     }
 
     pub fn match_token(&self, token: String) -> bool {
         self.t == token
     }
-
 }
 
 impl Display for Identity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.i == 0 {
+        if self.i.is_empty() {
             return write!(f, "<none>");
         }
 

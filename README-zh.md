@@ -60,12 +60,28 @@ Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) �
 ## 本地运行
 
 ```bash
-# 数据库
-deploy/db.sql
+# 1. 初始化数据库
+# 例如：将数据库脚本放在 deploy/db.sql 路径下
 
-# 配置文件
+# 2. 克隆项目代码库
+git clone https://github.com/lniche/aphrodite-rs.git
+cd aphrodite-rs
+
+# 3. 构建项目
+# 确保你已经安装了 Rust 和 Cargo
+cargo build
+
+# 4. 配置文件
+# 将配置示例文件重命名为 config.toml
 mv config.toml.example config.toml
 
-# 启动服务
+# 5. 编辑配置文件（如果需要）
+# 使用你喜欢的文本编辑器打开 config.toml
+# 例如使用 vim：
+vim config.toml
+# 根据你的需求修改配置参数（如数据库连接、服务端口等）
+
+# 6. 启动服务
+# 运行服务
 cargo run -- serve
 ```

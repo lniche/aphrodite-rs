@@ -1,73 +1,25 @@
 use std::collections::HashMap;
 
 use sea_orm::{
-    ColumnTrait, EntityTrait, Order, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, EntityTrait, Order, QueryFilter, QueryOrder, QuerySelect, Set,
 };
-use serde::{Deserialize, Serialize};
-use validator::Validate;
+use serde::Serialize;
 
-use crate::pkg::{
-    crypto::hash::md5,
-    core::db,
-    result::response::{ApiErr, ApiOK, Result},
-    util::helper,
+use crate::app::model::{prelude::User, user};
+use crate::{
+    app::api::user::GetUserResp,
+    pkg::{
+        core::db,
+        result::response::{ApiErr, ApiOK, Result},
+        util::helper,
+    },
 };
-
-use crate::app::model::{user, prelude::User};
 use chrono::{NaiveDateTime, Utc};
+use sea_orm::sea_query::Expr;
 
-
-#[derive(Debug, Validate, Deserialize, Serialize)]
-pub struct ReqCreate {
-    #[validate(length(min = 1, message = "用户名必填"))]
-    pub username: String,
-    #[validate(length(min = 1, message = "密码必填"))]
-    pub password: String,
-}
-
-pub async fn create(req: ReqCreate) -> Result<ApiOK<()>> {
-    let count = User::find()
-        .filter(user::Column::Username.eq(req.username.clone()))
-        .count(db::conn())
-        .await
-        .map_err(|e| {
-            tracing::error!(error = ?e, "error find user");
-            ApiErr::ErrSystem(None)
-        })?;
-    if count > 0 {
-        return Err(ApiErr::ErrPerm(Some("该用户名已被使用".to_string())));
-    }
-
-    let salt = helper::nonce(16);
-    let pass = format!("{}{}", req.password, salt);
-    let now = Utc::now().naive_utc();
-    let model = user::ActiveModel {
-        username: Set(req.username),
-        password: Set(md5(pass.as_bytes())),
-        salt: Set(salt),
-        created_at: Set(now),
-        updated_at: Set(now),
-        ..Default::default()
-    };
-
-    if let Err(e) = User::insert(model).exec(db::conn()).await {
-        tracing::error!(error = ?e, "error insert user");
-        return Err(ApiErr::ErrSystem(None));
-    }
-
-    Ok(ApiOK(None))
-}
-
-#[derive(Debug, Serialize)]
-pub struct RespInfo {
-    pub id: u64,
-    pub username: String,
-    pub login_at: NaiveDateTime,
-    pub created_at: NaiveDateTime,
-}
-
-pub async fn info(user_id: u64) -> Result<ApiOK<RespInfo>> {
-    let model = User::find_by_id(user_id)
+pub async fn info(user_code: String) -> Result<ApiOK<GetUserResp>> {
+    let model = User::find()
+        .filter(user::Column::UserCode.eq(user_code))
         .one(db::conn())
         .await
         .map_err(|e| {
@@ -76,14 +28,23 @@ pub async fn info(user_id: u64) -> Result<ApiOK<RespInfo>> {
         })?
         .ok_or(ApiErr::ErrNotFound(Some("账号不存在".to_string())))?;
 
-    let resp = RespInfo {
-        id: model.id,
-        username: model.username,
-        login_at: model.login_at,
-        created_at: model.created_at,
+    let resp = GetUserResp {
+        user_code: model.user_code,
+        user_no: model.user_no,
+        nickname: model.nickname,
+        email: model.email,
+        phone: model.phone,
     };
 
     Ok(ApiOK(Some(resp)))
+}
+
+#[derive(Debug, Serialize)]
+pub struct RespInfo {
+    pub id: u64,
+    pub username: String,
+    login_at: NaiveDateTime,
+    created_at: NaiveDateTime,
 }
 
 #[derive(Debug, Serialize)]
@@ -143,4 +104,50 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
     }
 
     Ok(ApiOK(Some(resp)))
+}
+
+pub async fn update(user_code: String) -> Result<ApiOK<()>> {
+    let _model = User::find()
+        .filter(user::Column::UserCode.eq(user_code.clone()))
+        .one(db::conn())
+        .await
+        .map_err(|e| {
+            tracing::error!(error = ?e, "error find user");
+            ApiErr::ErrSystem(None)
+        })?
+        .ok_or(ApiErr::ErrNotFound(Some("账号不存在".to_string())))?;
+    let ret = User::update_many()
+        .filter(user::Column::UserCode.eq(user_code))
+        .col_expr(user::Column::Deleted, Expr::value(true))
+        .col_expr(user::Column::DeletedAt, Expr::value(Utc::now().naive_utc()))
+        .exec(db::conn())
+        .await;
+
+    if let Err(e) = ret {
+        tracing::error!(error = ?e, "error update user");
+        return Err(ApiErr::ErrSystem(None));
+    }
+    Ok(ApiOK(None))
+}
+
+pub async fn delete(user_code: String) -> Result<ApiOK<()>> {
+    let model = User::find()
+        .filter(user::Column::UserCode.eq(user_code))
+        .one(db::conn())
+        .await
+        .map_err(|e| {
+            tracing::error!(error = ?e, "error find user");
+            ApiErr::ErrSystem(None)
+        })?
+        .ok_or(ApiErr::ErrNotFound(Some("账号不存在".to_string())))?;
+
+    let mut active_model: user::ActiveModel = model.into();
+    active_model.deleted = Set(true);
+    active_model.deleted_at = Set(Utc::now().naive_utc());
+
+    if let Err(e) = active_model.update(db::conn()).await {
+        tracing::error!(error = ?e, "error update user");
+        return Err(ApiErr::ErrSystem(None));
+    }
+    Ok(ApiOK(None))
 }

@@ -2,36 +2,59 @@ use std::collections::HashMap;
 
 use axum::{
     extract::{Path, Query},
-    Extension, Json,
+    Extension,
 };
-use axum_extra::extract::WithRejection;
-use validator::Validate;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-use crate::app::service::{
-    self,
-    user::{ReqCreate, RespInfo, RespList},
-};
+use crate::app::service::{self, user::RespList};
+use crate::pkg::result::response::{ApiOK, Result};
 use crate::pkg::util::identity::Identity;
-use crate::pkg::result::{
-    rejection::IRejection,
-    response::{ApiErr, ApiOK, Result},
-};
 
-pub async fn register(
-    Extension(_identity): Extension<Identity>,
-    WithRejection(Json(req), _): IRejection<Json<ReqCreate>>,
-) -> Result<ApiOK<()>> {
-    if let Err(e) = req.validate() {
-        return Err(ApiErr::ErrParams(Some(e.to_string())));
-    }
-    service::user::create(req).await
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+// 响应获取用户信息的结构体
+pub struct GetUserResp {
+    // 用户的唯一标识代码
+    #[schema(example = "USR123456")]
+    pub user_code: String,
+
+    // 用户的登录名
+    #[schema(example = "100000")]
+    pub user_no: u64,
+
+    // 用户的昵称
+    #[schema(example = "john")]
+    pub nickname: String,
+
+    // 用户的电子邮件地址
+    #[schema(example = "john@example.com")]
+    pub email: String,
+
+    // 用户的电话号码
+    #[schema(example = "13800138000")]
+    pub phone: String,
 }
 
+// 用户信息接口
+#[utoipa::path(
+    get,
+    path = "/v1/user",
+    tag = "用户模块",
+    security(
+        ("bearer_auth" = []) 
+    ),
+    description = "用户信息接口"
+)]
 pub async fn info(
-    Extension(_identity): Extension<Identity>,
-    Path(user_id): Path<u64>,
-) -> Result<ApiOK<RespInfo>> {
-    service::user::info(user_id).await
+    Extension(identity): Extension<Identity>,
+    Path(user_code): Path<String>,
+) -> Result<ApiOK<GetUserResp>> {
+    let user_code = if user_code.is_empty() && !identity.code().is_empty() {
+        identity.code()
+    } else {
+        user_code
+    };
+    service::user::info(user_code).await
 }
 
 pub async fn list(
@@ -39,4 +62,44 @@ pub async fn list(
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<ApiOK<RespList>> {
     service::user::list(query).await
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+// 请求更新用户信息的结构体
+pub struct UpdateUserReq {
+    // 用户的新昵称
+    #[schema(example = "john")]
+    pub nickname: String,
+
+    // 用户的新电子邮件地址
+    #[schema(example = "john@example.com")]
+    pub email: String,
+}
+
+// 用户更新接口
+#[utoipa::path(
+    put,
+    path = "/v1/user",
+    tag = "用户模块",
+    security(
+        ("bearer_auth" = []) 
+    ),
+    description = "用户更新接口"
+)]
+pub async fn update(Extension(_identity): Extension<Identity>) -> Result<ApiOK<()>> {
+    return Ok(ApiOK(None));
+}
+
+// 用户删除接口
+#[utoipa::path(
+    delete,
+    path = "/v1/user",
+    tag = "用户模块",
+    security(
+        ("bearer_auth" = []) 
+    ),
+    description = "用户删除接口"
+)]
+pub async fn delete(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
+    service::user::delete(identity.code()).await
 }
