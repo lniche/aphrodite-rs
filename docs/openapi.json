@@ -19,7 +19,7 @@
         "tags": [
           "认证模块"
         ],
-        "description": "用户登录接口",
+        "description": "用户登录接口,用户登录接口",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -79,10 +79,85 @@
         },
         "responses": {}
       }
+    },
+    "/v1/user": {
+      "get": {
+        "tags": [
+          "用户模块"
+        ],
+        "description": "用户信息接口",
+        "operationId": "info",
+        "responses": {},
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "用户模块"
+        ],
+        "description": "用户更新接口",
+        "operationId": "update",
+        "responses": {},
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "用户模块"
+        ],
+        "description": "用户删除接口",
+        "operationId": "delete",
+        "responses": {},
+        "security": [
+          {
+            "bearer_auth": []
+          }
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "GetUserResp": {
+        "type": "object",
+        "required": [
+          "user_code",
+          "user_no",
+          "nickname",
+          "email",
+          "phone"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "nickname": {
+            "type": "string",
+            "example": "john"
+          },
+          "phone": {
+            "type": "string",
+            "example": "13800138000"
+          },
+          "user_code": {
+            "type": "string",
+            "example": "S8000"
+          },
+          "user_no": {
+            "type": "integer",
+            "format": "int64",
+            "example": "100000",
+            "minimum": 0
+          }
+        }
+      },
       "LoginReq": {
         "type": "object",
         "required": [
@@ -121,6 +196,23 @@
           "phone": {
             "type": "string",
             "example": "13800138000"
+          }
+        }
+      },
+      "UpdateUserReq": {
+        "type": "object",
+        "required": [
+          "nickname",
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "nickname": {
+            "type": "string",
+            "example": "john"
           }
         }
       }

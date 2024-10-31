@@ -24,6 +24,8 @@ pub struct Model {
     pub created_at: DateTime,
     pub updated_at: DateTime,
     pub deleted_at: DateTime,
+    pub created_by: String,
+    pub updated_by: String,
     pub version: u8,
     #[sea_orm(column_name = "is_deleted")]
     pub deleted: bool,

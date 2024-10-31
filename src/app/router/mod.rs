@@ -1,15 +1,11 @@
 pub mod route;
 use crate::app::api::auth::{LoginReq, LoginResp, SendVerifyCodeReq};
+use crate::app::api::user::{GetUserResp, UpdateUserReq};
 use crate::app::{
     api::{auth, health, user},
     middleware,
 };
-use axum::{
-    body::Body,
-    http::Request,
-    routing::{get, post},
-    Router,
-};
+use axum::{body::Body, http::Request, routing::get, Router};
 use tower_http::trace::TraceLayer;
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::{ComponentsBuilder, OpenApiBuilder, ServerBuilder};
@@ -32,7 +28,7 @@ pub fn init() -> Router {
             version = "1.0.0",
             description = "API Description",
         ),
-        paths(auth::login, auth::logout,auth::send_verify_code),
+        paths(auth::login, auth::logout,auth::send_verify_code,user::info,user::update,user::delete),
         // components(schemas(ReqLogin, RespLogin))
     )]
     struct ApiDoc;
@@ -56,6 +52,8 @@ pub fn init() -> Router {
                     .schema_from::<LoginReq>()
                     .schema_from::<LoginResp>()
                     .schema_from::<SendVerifyCodeReq>()
+                    .schema_from::<UpdateUserReq>()
+                    .schema_from::<GetUserResp>()
                     .security_scheme(
                         "bearer_auth",
                         SecurityScheme::Http(

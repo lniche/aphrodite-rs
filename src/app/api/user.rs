@@ -15,7 +15,7 @@ use crate::pkg::util::identity::Identity;
 // 响应获取用户信息的结构体
 pub struct GetUserResp {
     // 用户的唯一标识代码
-    #[schema(example = "USR123456")]
+    #[schema(example = "S8000")]
     pub user_code: String,
 
     // 用户的登录名
@@ -86,8 +86,8 @@ pub struct UpdateUserReq {
     ),
     description = "用户更新接口"
 )]
-pub async fn update(Extension(_identity): Extension<Identity>) -> Result<ApiOK<()>> {
-    return Ok(ApiOK(None));
+pub async fn update(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
+    service::user::update(identity.code()).await
 }
 
 // 用户删除接口

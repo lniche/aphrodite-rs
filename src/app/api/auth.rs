@@ -1,5 +1,8 @@
+use std::net::SocketAddr;
+
 use axum::{Extension, Json};
 use axum_extra::extract::WithRejection;
+use http::Request;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
@@ -74,7 +77,7 @@ pub async fn login(
     if let Err(e) = req.validate() {
         return Err(ApiErr::ErrParams(Some(e.to_string())));
     }
-    service::auth::login(req).await
+    service::auth::login(req, "".to_string()).await
 }
 
 // 用户退出登录接口

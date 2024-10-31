@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use axum::{extract::Request, middleware::Next, response::Response};
 use http::header::AUTHORIZATION;
 
@@ -16,5 +18,13 @@ pub async fn handle(mut request: Request, next: Next) -> Response {
         },
     };
     request.extensions_mut().insert(identity);
+
+    let ip = request
+        .extensions()
+        .get::<SocketAddr>()
+        .map(|addr| addr.ip().to_string())
+        .unwrap_or_else(|| "unknown".to_string());
+    request.extensions_mut().insert(ip);
+
     next.run(request).await
 }

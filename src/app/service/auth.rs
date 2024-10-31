@@ -1,6 +1,6 @@
 use chrono::Utc;
 use sea_orm::sea_query::Expr;
-use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set};
 use time::macros::offset;
 
 use crate::pkg::core::{cache, db};
@@ -15,8 +15,8 @@ use crate::app::model::user;
 
 use rand::Rng;
 
-pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
-    let redis_key = format!("{}{}", SEND_CODE_KEY, req.code);
+pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
+    let redis_key = format!("{}{}", SEND_CODE_KEY, req.phone);
     let cache_code: String = match cache::RedisClient::get(&redis_key) {
         Ok(value) => value,
         Err(e) => {
@@ -25,6 +25,11 @@ pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
         }
     };
     if cache_code != req.code {
+        tracing::error!(
+            "验证码不正确: cache_code = {:?}, req.code = {:?}",
+            cache_code,
+            req.code
+        );
         return Err(ApiErr::ErrSystem(Some("验证码不正确".to_string())));
     }
     let user_option = User::find()
@@ -44,11 +49,11 @@ pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
         user_code = user.user_code.clone();
         login_token = md5(format!("auth.{}.{}.{}", user_code, now, helper::nonce(16)).as_bytes());
         let update_model = user::ActiveModel {
+            client_ip: Set(ip),
             login_at: Set(now),
             login_token: Set(login_token.clone()),
             ..Default::default()
         };
-
         User::update_many()
             .filter(user::Column::UserCode.eq(user.user_code.clone()))
             .set(update_model)
@@ -66,17 +71,20 @@ pub async fn login(req: LoginReq) -> Result<ApiOK<LoginResp>> {
             tracing::error!(error = ?e, "Failed to generate user_no");
             ApiErr::ErrSystem(None)
         })?;
-
+        let phone_suffix = &req.phone[req.phone.len().saturating_sub(4)..];
+        let nickname_value = format!("A{}", phone_suffix);
         let new_user = user::ActiveModel {
             phone: Set(req.phone.clone()),
+            nickname: Set(nickname_value),
             user_code: Set(user_code.clone()),
             user_no: Set(user_no),
-            client_ip: Set(user_code.clone()),
+            client_ip: Set(ip),
             login_token: Set(login_token.clone()),
             login_at: Set(now),
+            created_at: Set(now),
+            created_by: Set("777".to_string()),
             ..Default::default()
         };
-
         User::insert(new_user).exec(db::conn()).await.map_err(|e| {
             tracing::error!(error = ?e, "Failed to create user");
             ApiErr::ErrSystem(None)
