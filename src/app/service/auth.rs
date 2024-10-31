@@ -91,7 +91,6 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         })?;
     }
 
-    // 生成 access_token
     let access_token = Identity::new(req.phone.clone(), login_token.clone())
         .to_auth_token()
         .map_err(|e| {
@@ -99,7 +98,6 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
             ApiErr::ErrSystem(None)
         })?;
 
-    // 返回成功响应
     let resp = LoginResp { access_token };
     Ok(ApiOK(Some(resp)))
 }

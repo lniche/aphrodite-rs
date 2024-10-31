@@ -19,7 +19,7 @@
         "tags": [
           "认证模块"
         ],
-        "description": "用户登录接口,用户登录接口",
+        "description": "用户登录接口",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -100,6 +100,16 @@
         ],
         "description": "用户更新接口",
         "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReq"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {},
         "security": [
           {

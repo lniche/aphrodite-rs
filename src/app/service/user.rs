@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, EntityTrait, Order, QueryFilter, QueryOrder, QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, EntityTrait, Order, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set
 };
 use serde::Serialize;
 
+use crate::app::api::user::UpdateUserReq;
 use crate::app::model::{prelude::User, user};
 use crate::{
     app::api::user::GetUserResp,
@@ -106,22 +107,27 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
     Ok(ApiOK(Some(resp)))
 }
 
-pub async fn update(user_code: String) -> Result<ApiOK<()>> {
-    let _model = User::find()
+pub async fn update(req: UpdateUserReq, user_code: String) -> Result<ApiOK<()>> {
+    let count = User::find()
         .filter(user::Column::UserCode.eq(user_code.clone()))
-        .one(db::conn())
+        .count(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error find user");
+            tracing::error!(error = ?e, "error counting users");
             ApiErr::ErrSystem(None)
-        })?
-        .ok_or(ApiErr::ErrNotFound(Some("账号不存在".to_string())))?;
-    let ret = User::update_many()
-        .filter(user::Column::UserCode.eq(user_code))
-        .col_expr(user::Column::Deleted, Expr::value(true))
-        .col_expr(user::Column::DeletedAt, Expr::value(Utc::now().naive_utc()))
-        .exec(db::conn())
-        .await;
+        })?;
+    if count == 0 {
+        return Err(ApiErr::ErrNotFound(Some("账号不存在".to_string())));
+    }
+    let mut update_query = User::update_many().filter(user::Column::UserCode.eq(user_code));
+    if !req.nickname.is_empty() {
+        update_query = update_query.col_expr(user::Column::Nickname, Expr::value(req.nickname));
+    }
+    if !req.email.is_empty() {
+        update_query = update_query.col_expr(user::Column::Email, Expr::value(req.email));
+    }
+
+    let ret = update_query.exec(db::conn()).await;
 
     if let Err(e) = ret {
         tracing::error!(error = ?e, "error update user");

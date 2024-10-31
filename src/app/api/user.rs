@@ -2,14 +2,18 @@ use std::collections::HashMap;
 
 use axum::{
     extract::{Path, Query},
-    Extension,
+    Extension, Json,
 };
+use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::app::service::{self, user::RespList};
 use crate::pkg::result::response::{ApiOK, Result};
 use crate::pkg::util::identity::Identity;
+use crate::{
+    app::service::{self, user::RespList},
+    pkg::result::rejection::IRejection,
+};
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 // 响应获取用户信息的结构体
@@ -86,8 +90,11 @@ pub struct UpdateUserReq {
     ),
     description = "用户更新接口"
 )]
-pub async fn update(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
-    service::user::update(identity.code()).await
+pub async fn update(
+    Extension(identity): Extension<Identity>,
+    WithRejection(Json(req), _): IRejection<Json<UpdateUserReq>>,
+) -> Result<ApiOK<()>> {
+    service::user::update(req, identity.code()).await
 }
 
 // 用户删除接口
