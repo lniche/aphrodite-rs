@@ -72,16 +72,9 @@ cd aphrodite-rs
 cargo build
 
 # 4. 配置文件
-# 将配置示例文件重命名为 config.toml
+cd config
 mv config.toml.example config.toml
 
-# 5. 编辑配置文件（如果需要）
-# 使用你喜欢的文本编辑器打开 config.toml
-# 例如使用 vim：
-vim config.toml
-# 根据你的需求修改配置参数（如数据库连接、服务端口等）
-
 # 6. 启动服务
-# 运行服务
 cargo run -- serve
 ```
