@@ -11,8 +11,8 @@ use http_body_util::BodyExt;
 use hyper::HeaderMap;
 use time::macros::offset;
 
-use crate::pkg::util::{identity::Identity, xtime};
 use crate::pkg::result::response::ApiErr;
+use crate::pkg::util::{identity::Identity, xtime};
 
 pub async fn handle(request: Request, next: Next) -> Response {
     let enter_time = xtime::now(offset!(+8));
@@ -38,7 +38,7 @@ pub async fn handle(request: Request, next: Next) -> Response {
         identity = identity,
         body = body,
         duration = duration,
-        "请求记录"
+        "REQUEST LOG"
     );
 
     response

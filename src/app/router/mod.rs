@@ -5,8 +5,7 @@ use crate::app::{
     api::{auth, health, user},
     middleware,
 };
-use axum::{body::Body, http::Request, routing::get, Router};
-use tower_http::trace::TraceLayer;
+use axum::{routing::get, Router};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::{ComponentsBuilder, OpenApiBuilder, ServerBuilder};
 use utoipa::OpenApi;
@@ -33,17 +32,21 @@ pub fn init() -> Router {
     )]
     struct ApiDoc;
 
-    pub fn generate_openapi_json(address: String) -> utoipa::openapi::OpenApi {
-        // This is the equivalent of the following snippet annotation:
-        // However we wannt grab the data from our env to generate the openapi.json file
-        // servers(
-        //     (url = "http://localhost:5000", description = "Local server"),
-        // ),
-        let server = ServerBuilder::new().url(address).build();
+    pub fn generate_openapi_json() -> utoipa::openapi::OpenApi {
+        let dev_address = "http://localhost:8000".to_string();
+        let test_address = "http://test.aphrodite.com".to_string();
 
-        // Add more servers as you wish here
-        // Take note that the sever that you want to expose should be here else don't include it
-        let servers = vec![server];
+        let servers = vec![
+            ServerBuilder::new()
+                .url(dev_address)
+                .description(Some("Development Environment"))
+                .build(),
+            ServerBuilder::new()
+                .url(test_address)
+                .description(Some("Test Environment"))
+                .build(),
+        ];
+
         let builder: OpenApiBuilder = ApiDoc::openapi().into();
         let openapi = builder
             .servers(Some(servers))
@@ -70,7 +73,7 @@ pub fn init() -> Router {
         openapi
     }
 
-    let openapi = generate_openapi_json("http://127.0.0.1:8000".parse().unwrap());
+    let openapi = generate_openapi_json();
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
