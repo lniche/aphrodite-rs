@@ -86,20 +86,6 @@ pub fn init() -> Router {
         .layer(axum::middleware::from_fn(
             crate::pkg::middleware::cors::handle,
         ))
-        .layer(
-            TraceLayer::new_for_http().make_span_with(|request: &Request<Body>| {
-                let req_id = match request
-                    .headers()
-                    .get("x-request-id")
-                    .and_then(|value| value.to_str().ok())
-                {
-                    Some(v) => v.to_string(),
-                    None => String::from("unknown"),
-                };
-
-                tracing::error_span!("request_id", id = req_id)
-            }),
-        )
         .layer(axum::middleware::from_fn(
             crate::pkg::middleware::trace::handle,
         ))
