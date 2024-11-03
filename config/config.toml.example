@@ -17,5 +17,5 @@ nodes = ["redis://127.0.0.1:6379/0"]
 options = { max_size = 20, min_idle = 10, conn_timeout = 10, idle_timeout = 300, max_lifetime = 60 }
 
 [log]
-path = "logs"
-filename = "tracing.log"
+path = "storage/logs"
+filename = "server.log"

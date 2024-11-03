@@ -1,6 +1,6 @@
 # Aphrodite Rust API 快速开发脚手架
 
-Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) 开发的模板项目，旨在帮助开发者快速上手，深入理解框架的使用流程。该项目提供了全面的示例代码和配置，涵盖了常见的开发场景，以便于学习和实践。此外，Aphrodite 还包含容器部署模板，使得项目在现代云环境中能够轻松部署与管理，助力开发者高效构建和发布应用。
+> Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) 开发的模板项目，旨在帮助开发者快速上手，深入理解框架的使用流程。该项目提供了全面的示例代码和配置，涵盖了常见的开发场景，以便于学习和实践。此外，Aphrodite 还包含容器部署模板，使得项目在现代云环境中能够轻松部署与管理，助力开发者高效构建和发布应用。
 
 | 技术                                 | 说明                                         |
 |-------------------------------------|--------------------------------------------|
@@ -60,21 +60,25 @@ Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) �
 ## 本地运行
 
 ```bash
-# 1. 初始化数据库
-# 例如：将数据库脚本放在 deploy/db.sql 路径下
-
-# 2. 克隆项目代码库
+# 1. 克隆项目代码库
 git clone https://github.com/lniche/aphrodite-rs.git
 cd aphrodite-rs
 
-# 3. 构建项目
-# 确保你已经安装了 Rust 和 Cargo
-cargo build
-
-# 4. 配置文件
+# 2. 配置文件
 cd config
 mv config.toml.example config.toml
 
-# 6. 启动服务
+# 3. 处理依赖
+# 确保你已经安装了 Rust 和 Cargo
+cargo build
+
+# 4. 初始化数据库
+deploy/db.sql
+
+# 5. 启动服务
 cargo run -- serve
 ```
+
+## 包管理
+
+https://crates.io
