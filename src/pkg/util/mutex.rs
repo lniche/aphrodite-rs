@@ -14,7 +14,6 @@ else
 end
 ";
 
-// 基于Redis的分布式锁
 pub struct RedisLock {
     key: String,
     token: String,
@@ -32,12 +31,10 @@ impl RedisLock {
         }
     }
 
-    // 获取锁
     pub async fn lock(&mut self) -> anyhow::Result<bool> {
         self._acquire().await
     }
 
-    // 尝试获取锁
     pub async fn try_lock(&mut self, attempts: i32, delay: time::Duration) -> anyhow::Result<bool> {
         for i in 0..attempts {
             let ok = self._acquire().await?;
@@ -51,7 +48,6 @@ impl RedisLock {
         Ok(false)
     }
 
-    // 释放锁(手动)
     pub async fn unlock(&mut self) -> anyhow::Result<()> {
         if self.token.is_empty() {
             return Ok(());
@@ -83,7 +79,6 @@ impl RedisLock {
                 Ok(false)
             }
             Err(e) => {
-                // 尝试GET一次：避免因redis网络错误导致误加锁
                 let ret_get: Option<String> = conn.get(&self.key).await?;
                 let v = ret_get.ok_or(e)?;
                 if v == token {
@@ -96,7 +91,6 @@ impl RedisLock {
     }
 }
 
-// 释放锁(自动)
 impl Drop for RedisLock {
     fn drop(&mut self) {
         if !self.unlock || self.token.is_empty() {

@@ -10,9 +10,9 @@ pub mod pkg;
 #[tokio::main]
 async fn main() {
     let cli = cmd::Cli::parse();
-    // _guard 必须在 main 函数中才能使日志生效
+    // _guard must be in the main function for the logging to take effect
     let _guard = init(&cli.config).await;
-    // 处理subcommand
+    // Handle subcommand
     if let Some(v) = cli.command {
         match v {
             cmd::Command::Hello { name } => cmd::hello::exec(name),
@@ -22,13 +22,13 @@ async fn main() {
 }
 
 async fn init(cfg_file: &str) -> WorkerGuard {
-    // 初始化配置
+    // Initialize configuration
     config::init(cfg_file);
-    // 初始化日志
+    // Initialize logging
     let _guard = logger::init(Some(config::global()));
-    // 初始化数据库
+    // Initialize database
     db::init(config::global()).await;
-    // 初始化Redis
+    // Initialize Redis
     cache::init_redis(config::global());
 
     _guard

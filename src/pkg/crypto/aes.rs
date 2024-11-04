@@ -17,7 +17,6 @@ impl<'a> CBC<'a> {
         Ok(cipher)
     }
 
-    // 填充字节, 默认: BlockSize(16)
     pub fn encrypt(&self, data: &[u8], padding_size: Option<usize>) -> Result<Vec<u8>> {
         let t = self.cipher()?;
         let CBC(key, iv) = *self;
@@ -61,7 +60,6 @@ impl<'a> ECB<'a> {
         Ok(cipher)
     }
 
-    // 填充字节, 默认: BlockSize(16)
     pub fn encrypt(&self, data: &[u8], padding_size: Option<usize>) -> Result<Vec<u8>> {
         let t = self.cipher()?;
         let ECB(key) = *self;
@@ -105,7 +103,6 @@ impl<'a> GCM<'a> {
         Ok(cipher)
     }
 
-    // tag_size, 默认: 16, 可取范围: [12, 16]
     pub fn encrypt(
         &self,
         data: &[u8],
@@ -155,14 +152,12 @@ mod tests {
         let key = b"AES256Key-32Characters1234567890";
         let cbc = CBC(key, &key[..16]);
 
-        // 默认填充
         let cipher = cbc.encrypt(b"ILoveYiigo", None).unwrap();
         assert_eq!(BASE64_STANDARD.encode(&cipher), "kyJ6t0cpUYpoWaewhTwDwQ==");
 
         let plain = cbc.decrypt(&cipher).unwrap();
         assert_eq!(plain, b"ILoveYiigo");
 
-        // 32字节填充
         let cipher2 = cbc.encrypt(b"ILoveYiigo", Some(32)).unwrap();
         assert_eq!(
             BASE64_STANDARD.encode(&cipher2),
@@ -178,14 +173,12 @@ mod tests {
         let key = b"AES256Key-32Characters1234567890";
         let ecb = ECB(key);
 
-        // 默认填充
         let cipher = ecb.encrypt(b"ILoveYiigo", None).unwrap();
         assert_eq!(BASE64_STANDARD.encode(&cipher), "8+evCMirn78a5l2mCCdJug==");
 
         let plain = ecb.decrypt(&cipher).unwrap();
         assert_eq!(plain, b"ILoveYiigo");
 
-        // 32字节填充
         let cipher2 = ecb.encrypt(b"ILoveYiigo", Some(32)).unwrap();
         assert_eq!(
             BASE64_STANDARD.encode(&cipher2),
@@ -201,7 +194,6 @@ mod tests {
         let key = b"AES256Key-32Characters1234567890";
         let gcm = GCM(key, &key[..12]);
 
-        // 默认 tag_size
         let (cipher, tag) = gcm.encrypt(b"ILoveYiigo", b"IIInsomnia", None).unwrap();
         assert_eq!(BASE64_STANDARD.encode(&cipher), "qciumnRZKY42HQ==");
         assert_eq!(BASE64_STANDARD.encode(&tag), "WOeD9xSN3RX44lkHpnBEXw==");
@@ -209,7 +201,6 @@ mod tests {
         let plain = gcm.decrypt(&cipher, b"IIInsomnia", &tag).unwrap();
         assert_eq!(plain, b"ILoveYiigo");
 
-        // 指定 tag_size
         let (cipher2, tag2) = gcm.encrypt(b"ILoveYiigo", b"IIInsomnia", Some(12)).unwrap();
         assert_eq!(BASE64_STANDARD.encode(&cipher2), "qciumnRZKY42HQ==");
         assert_eq!(BASE64_STANDARD.encode(&tag2), "WOeD9xSN3RX44lkH");

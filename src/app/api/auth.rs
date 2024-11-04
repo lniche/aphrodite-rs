@@ -6,7 +6,7 @@ use validator::Validate;
 
 use crate::pkg::result::{
     rejection::IRejection,
-    response::{Results, Errors, Result},
+    response::{Errors, Result, Results},
 };
 use crate::pkg::util::identity::Identity;
 
@@ -14,19 +14,19 @@ use crate::app::service;
 
 #[derive(Debug, Validate, Deserialize, Serialize, ToSchema)]
 pub struct SendVerifyCodeReq {
-    // +区号手机号
-    #[validate(length(min = 1, message = "手机号必填"))]
+    // + country code phone number
+    #[validate(length(min = 1, message = "Phone number is required"))]
     #[schema(example = "13800138000")]
     pub phone: String,
 }
 
-// 发送验证码
+// Send verification code
 #[utoipa::path(
     post,
     path = "/v1/send-code",
-    tag = "认证模块",
+    tag = "Authentication Module",
     request_body = SendVerifyCodeReq,
-    description = "发送校验短信"
+    description = "Send verification SMS"
 )]
 pub async fn send_verify_code(
     WithRejection(Json(req), _): IRejection<Json<SendVerifyCodeReq>>,
@@ -39,34 +39,34 @@ pub async fn send_verify_code(
 
 #[derive(Debug, Validate, Deserialize, Serialize, ToSchema)]
 pub struct LoginReq {
-    // 登录的用户名
-    #[validate(length(min = 1, message = "用户名必填"))]
+    // Username for login
+    #[validate(length(min = 1, message = "Username is required"))]
     #[schema(example = "13800138000")]
     pub phone: String,
 
-    // 用户的密码
-    #[validate(length(min = 1, message = "密码必填"))]
+    // User's password
+    #[validate(length(min = 1, message = "Password is required"))]
     #[schema(example = "1234")]
     pub code: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct LoginResp {
-    // 访问令牌
+    // Access token
     #[schema(example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")]
     pub access_token: String,
 }
 
-// 用户登录接口
+// User login interface
 #[utoipa::path(
     post,
     path = "/v1/login",
-    tag = "认证模块",
+    tag = "Authentication Module",
     request_body = LoginReq,
     responses(
-        (status = 200, description = "获取用户信息成功", body = LoginResp)
+        (status = 200, description = "Successfully retrieved user information", body = LoginResp)
     ),
-    description = "用户登录接口"
+    description = "User login interface"
 )]
 pub async fn login(
     Extension(ip): Extension<String>,
@@ -78,15 +78,15 @@ pub async fn login(
     service::auth::login(req, ip).await
 }
 
-// 用户退出登录接口
+// User logout interface
 #[utoipa::path(
     post,
     path = "/v1/logout",
-    tag = "认证模块",
+    tag = "Authentication Module",
     security(
         ("bearer_auth" = []) 
     ),
-    description = "用户退出登录接口"
+    description = "User logout interface"
 )]
 pub async fn logout(Extension(identity): Extension<Identity>) -> Result<Results<()>> {
     service::auth::logout(identity.code()).await

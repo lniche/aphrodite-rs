@@ -4,12 +4,10 @@ pub const DATE: &str = "[year]-[month]-[day]";
 pub const TIME: &str = "[hour]:[minute]:[second]";
 pub const DATETIME: &str = "[year]-[month]-[day] [hour]:[minute]:[second]";
 
-// 获取当前时间
 pub fn now(offset: time::UtcOffset) -> time::OffsetDateTime {
     time::OffsetDateTime::now_utc().to_offset(offset)
 }
 
-// 根据时间字符串生成时间对象
 pub fn from_str(
     fmt: &str,
     datetime: &str,
@@ -20,7 +18,6 @@ pub fn from_str(
     Ok(v)
 }
 
-// 根据Unix时间戳生成时间对象
 pub fn from_timestamp(
     timestamp: i64,
     offset: time::UtcOffset,
@@ -32,7 +29,6 @@ pub fn from_timestamp(
     Ok(v)
 }
 
-// Unix时间戳格式化
 pub fn to_string(fmt: &str, timestamp: i64, offset: time::UtcOffset) -> anyhow::Result<String> {
     let format = time::format_description::parse(fmt)?;
     if timestamp < 0 {
@@ -47,7 +43,6 @@ pub fn to_string(fmt: &str, timestamp: i64, offset: time::UtcOffset) -> anyhow::
     Ok(v)
 }
 
-// 日期转Unix时间戳
 pub fn to_timestamp(fmt: &str, datetime: &str, offset: time::UtcOffset) -> anyhow::Result<i64> {
     if datetime.is_empty() {
         return Ok(0);

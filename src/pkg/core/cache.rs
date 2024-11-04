@@ -14,16 +14,19 @@ static REDIS_CLUSTER_POOL: OnceLock<RedisClusterPool> = OnceLock::new();
 static REDIS_CLUSTER_ASYNC_POOL: OnceLock<RedisClusterAsyncPool> = OnceLock::new();
 
 pub fn init_redis(cfg: &Config) {
-    let client = redis::Client::open(cfg.get_string("redis.dsn").expect("缺少DSN配置"))
-        .unwrap_or_else(|e| panic!("Redis连接失败: {}", e));
+    let client = redis::Client::open(
+        cfg.get_string("redis.dsn")
+            .expect("Missing DSN configuration"),
+    )
+    .unwrap_or_else(|e| panic!("Redis connnect fail: {}", e));
     let mut conn = client
         .get_connection()
-        .unwrap_or_else(|e| panic!("Redis连接失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis connnect fail: {}", e));
     let _ = redis::cmd("PING")
         .query::<String>(&mut conn)
-        .unwrap_or_else(|e| panic!("Redis连接失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis connnect fail: {}", e));
 
-    // 同步
+    // sync
     let pool = r2d2::Pool::builder()
         .max_size(cfg.get_int("redis.options.max_size").unwrap_or(20) as u32)
         .min_idle(Some(
@@ -39,10 +42,10 @@ pub fn init_redis(cfg: &Config) {
             cfg.get_int("redis.options.max_lifetime").unwrap_or(600) as u64,
         )))
         .build(client.clone())
-        .unwrap_or_else(|e| panic!("Redis连接池构建失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis pool build fail: {}", e));
     let _ = REDIS_POOL.set(pool);
 
-    // 异步
+    // ansyc
     let async_pool = mobc::Pool::builder()
         .max_open(cfg.get_int("redis.options.max_size").unwrap_or(20) as u64)
         .max_idle(cfg.get_int("redis.options.min_idle").unwrap_or(10) as u64)
@@ -62,20 +65,20 @@ pub fn init_redis(cfg: &Config) {
 pub fn init_redis_cluster(cfg: &Config) {
     let nodes = cfg
         .get_array("redis-cluster.nodes")
-        .expect("缺少nodes配置")
+        .expect("Missing nodes configuration")
         .into_iter()
         .map(|v| v.to_string())
         .collect::<Vec<String>>();
     let client = redis::cluster::ClusterClient::new(nodes)
-        .unwrap_or_else(|e| panic!("Redis连接失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis cluster connect fail: {}", e));
     let mut conn = client
         .get_connection()
-        .unwrap_or_else(|e| panic!("Redis集群连接失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis cluster connect fail: {}", e));
     let _ = redis::cmd("PING")
         .query::<String>(&mut conn)
-        .unwrap_or_else(|e| panic!("Redis集群连接失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis cluster connect fail: {}", e));
 
-    // 同步
+    // sync
     let pool = r2d2::Pool::builder()
         .max_size(cfg.get_int("redis-cluster.options.max_size").unwrap_or(20) as u32)
         .min_idle(Some(
@@ -94,10 +97,10 @@ pub fn init_redis_cluster(cfg: &Config) {
                 .unwrap_or(600) as u64,
         )))
         .build(client.clone())
-        .unwrap_or_else(|e| panic!("Redis集群连接池构建失败: {}", e));
+        .unwrap_or_else(|e| panic!("Redis cluster pool build fail: {}", e));
     let _ = REDIS_CLUSTER_POOL.set(pool);
 
-    // 异步
+    // async
     let async_pool = mobc::Pool::builder()
         .max_open(cfg.get_int("redis-cluster.options.max_size").unwrap_or(20) as u64)
         .max_idle(cfg.get_int("redis-cluster.options.min_idle").unwrap_or(10) as u64)
@@ -120,25 +123,25 @@ pub fn init_redis_cluster(cfg: &Config) {
 pub fn redis_pool() -> &'static RedisPool {
     REDIS_POOL
         .get()
-        .unwrap_or_else(|| panic!("Redis连接池未初始化"))
+        .unwrap_or_else(|| panic!("Redis pool init error"))
 }
 
 pub fn redis_async_pool() -> &'static RedisAsyncPool {
     REDIS_ASYNC_POOL
         .get()
-        .unwrap_or_else(|| panic!("Redis异步连接池未初始化"))
+        .unwrap_or_else(|| panic!("Redis async pool init error"))
 }
 
 pub fn redis_cluster_pool() -> &'static RedisClusterPool {
     REDIS_CLUSTER_POOL
         .get()
-        .unwrap_or_else(|| panic!("Redis集群连接池未初始化"))
+        .unwrap_or_else(|| panic!("Redis cluster pool init error"))
 }
 
 pub fn redis_cluster_async_pool() -> &'static RedisClusterAsyncPool {
     REDIS_CLUSTER_ASYNC_POOL
         .get()
-        .unwrap_or_else(|| panic!("Redis集群异步连接池未初始化"))
+        .unwrap_or_else(|| panic!("Redis cluster async pool init error"))
 }
 
 pub struct RedisAsyncConnManager {
@@ -266,7 +269,6 @@ impl RedisClient {
             ))
         })?;
 
-        // 使用 SET 命令带上过期时间
         match expire {
             Some(seconds) => {
                 conn.set_ex::<&str, &str, ()>(key, value, seconds)?;

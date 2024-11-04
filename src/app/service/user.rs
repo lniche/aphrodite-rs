@@ -12,7 +12,7 @@ use crate::{
     app::api::user::GetUserResp,
     pkg::{
         core::db,
-        result::response::{Results, Errors, Result},
+        result::response::{Errors, Result, Results},
         util::helper,
     },
 };
@@ -25,10 +25,12 @@ pub async fn info(user_code: String) -> Result<Results<GetUserResp>> {
         .one(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error find user");
+            tracing::error!(error = ?e, "Error finding user");
             Errors::ErrInternalServerError(None)
         })?
-        .ok_or(Errors::ErrNotFound(Some("账号不存在".to_string())))?;
+        .ok_or(Errors::ErrNotFound(Some(
+            "Account does not exist".to_string(),
+        )))?;
 
     let resp = GetUserResp {
         user_code: model.user_code,
@@ -65,7 +67,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<Results<RespList>> {
 
     let mut total: i64 = 0;
     let (offset, limit) = helper::query_page(&query);
-    // 仅在第一页计算数量
+    // Only calculate the total count on the first page
     if offset == 0 {
         total = builder
             .clone()
@@ -75,7 +77,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<Results<RespList>> {
             .one(db::conn())
             .await
             .map_err(|e| {
-                tracing::error!(error = ?e, "error count user");
+                tracing::error!(error = ?e, "Error counting users");
                 Errors::ErrInternalServerError(None)
             })?
             .unwrap_or_default();
@@ -88,13 +90,15 @@ pub async fn list(query: HashMap<String, String>) -> Result<Results<RespList>> {
         .all(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error find user");
+            tracing::error!(error = ?e, "Error finding users");
             Errors::ErrInternalServerError(None)
         })?;
+
     let mut resp = RespList {
         total,
-        list: (Vec::with_capacity(models.len())),
+        list: Vec::with_capacity(models.len()),
     };
+
     for model in models {
         let info = RespInfo {
             id: model.id,
@@ -114,12 +118,15 @@ pub async fn update(req: UpdateUserReq, user_code: String) -> Result<Results<()>
         .count(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error counting users");
+            tracing::error!(error = ?e, "Error counting users");
             Errors::ErrInternalServerError(None)
         })?;
     if count == 0 {
-        return Err(Errors::ErrNotFound(Some("账号不存在".to_string())));
+        return Err(Errors::ErrNotFound(Some(
+            "Account does not exist".to_string(),
+        )));
     }
+
     let mut update_query = User::update_many().filter(user::Column::UserCode.eq(user_code));
     if !req.nickname.is_empty() {
         update_query = update_query.col_expr(user::Column::Nickname, Expr::value(req.nickname));
@@ -131,7 +138,7 @@ pub async fn update(req: UpdateUserReq, user_code: String) -> Result<Results<()>
     let ret = update_query.exec(db::conn()).await;
 
     if let Err(e) = ret {
-        tracing::error!(error = ?e, "error update user");
+        tracing::error!(error = ?e, "Error updating user");
         return Err(Errors::ErrInternalServerError(None));
     }
     Ok(Results(None))
@@ -143,17 +150,19 @@ pub async fn delete(user_code: String) -> Result<Results<()>> {
         .one(db::conn())
         .await
         .map_err(|e| {
-            tracing::error!(error = ?e, "error find user");
+            tracing::error!(error = ?e, "Error finding user");
             Errors::ErrInternalServerError(None)
         })?
-        .ok_or(Errors::ErrNotFound(Some("账号不存在".to_string())))?;
+        .ok_or(Errors::ErrNotFound(Some(
+            "Account does not exist".to_string(),
+        )))?;
 
     let mut active_model: user::ActiveModel = model.into();
     active_model.deleted = Set(true);
     active_model.deleted_at = Set(Utc::now().naive_utc());
 
     if let Err(e) = active_model.update(db::conn()).await {
-        tracing::error!(error = ?e, "error update user");
+        tracing::error!(error = ?e, "Error updating user");
         return Err(Errors::ErrInternalServerError(None));
     }
     Ok(Results(None))

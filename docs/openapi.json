@@ -22,9 +22,9 @@
     "/v1/login": {
       "post": {
         "tags": [
-          "认证模块"
+          "Authentication Module"
         ],
-        "description": "用户登录接口",
+        "description": "User login interface",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -38,7 +38,7 @@
         },
         "responses": {
           "200": {
-            "description": "获取用户信息成功",
+            "description": "Successfully retrieved user information",
             "content": {
               "application/json": {
                 "schema": {
@@ -53,9 +53,9 @@
     "/v1/logout": {
       "post": {
         "tags": [
-          "认证模块"
+          "Authentication Module"
         ],
-        "description": "用户退出登录接口",
+        "description": "User logout interface",
         "operationId": "logout",
         "responses": {},
         "security": [
@@ -68,9 +68,9 @@
     "/v1/send-code": {
       "post": {
         "tags": [
-          "认证模块"
+          "Authentication Module"
         ],
-        "description": "发送校验短信",
+        "description": "Send verification SMS",
         "operationId": "send_verify_code",
         "requestBody": {
           "content": {
@@ -88,9 +88,9 @@
     "/v1/user": {
       "get": {
         "tags": [
-          "用户模块"
+          "User Module"
         ],
-        "description": "用户信息接口",
+        "description": "User information interface",
         "operationId": "info",
         "responses": {},
         "security": [
@@ -101,9 +101,9 @@
       },
       "put": {
         "tags": [
-          "用户模块"
+          "User Module"
         ],
-        "description": "用户更新接口",
+        "description": "User update interface",
         "operationId": "update",
         "requestBody": {
           "content": {
@@ -124,9 +124,9 @@
       },
       "delete": {
         "tags": [
-          "用户模块"
+          "User Module"
         ],
-        "description": "用户删除接口",
+        "description": "User delete interface",
         "operationId": "delete",
         "responses": {},
         "security": [

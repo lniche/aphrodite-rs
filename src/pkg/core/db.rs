@@ -6,7 +6,7 @@ use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 static DB: OnceLock<DatabaseConnection> = OnceLock::new();
 
 pub async fn init(cfg: &Config) {
-    let mut opt = ConnectOptions::new(cfg.get_string("db.dsn").expect("缺少DSN配置"));
+    let mut opt = ConnectOptions::new(cfg.get_string("db.dsn").expect("Missing DSN configuration"));
 
     opt.min_connections(cfg.get_int("db.options.min_conns").unwrap_or(10) as u32)
         .max_connections(cfg.get_int("db.options.max_conns").unwrap_or(20) as u32)
@@ -23,15 +23,16 @@ pub async fn init(cfg: &Config) {
 
     let conn = Database::connect(opt)
         .await
-        .unwrap_or_else(|e| panic!("数据库连接失败：{}", e));
+        .unwrap_or_else(|e| panic!("Database connection failed:{}", e));
     let _ = conn
         .ping()
         .await
-        .is_err_and(|e| panic!("数据库连接失败：{}", e));
+        .is_err_and(|e| panic!("Database connection failed:{}", e));
 
     let _ = DB.set(conn);
 }
 
 pub fn conn() -> &'static DatabaseConnection {
-    DB.get().unwrap_or_else(|| panic!("数据库连接未初始化"))
+    DB.get()
+        .unwrap_or_else(|| panic!("Database connection not initialized"))
 }

@@ -7,7 +7,6 @@ use tracing_subscriber::fmt::format::Writer;
 use tracing_subscriber::{self, fmt::time::FormatTime};
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, Layer, Registry};
 
-// 格式化日志的输出时间格式
 struct LocalTimer;
 
 impl FormatTime for LocalTimer {

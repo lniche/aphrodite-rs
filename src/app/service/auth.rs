@@ -5,7 +5,7 @@ use time::macros::offset;
 
 use crate::pkg::core::{cache, db};
 use crate::pkg::crypto::hash::md5;
-use crate::pkg::result::response::{Results, Errors, Result};
+use crate::pkg::result::response::{Errors, Result, Results};
 use crate::pkg::util::snowflake::SnowflakeGen;
 use crate::pkg::util::{helper, identity::Identity, xtime};
 
@@ -26,12 +26,12 @@ pub async fn login(req: LoginReq, ip: String) -> Result<Results<LoginResp>> {
     };
     if cache_code != req.code {
         tracing::error!(
-            "验证码不正确: cache_code = {:?}, req.code = {:?}",
+            "Verification code is incorrect: cache_code = {:?}, req.code = {:?}",
             cache_code,
             req.code
         );
         return Err(Errors::ErrInternalServerError(Some(
-            "验证码不正确".to_string(),
+            "Verification code is incorrect".to_string(),
         )));
     }
     let user_option = User::find()
@@ -116,7 +116,7 @@ pub async fn logout(user_code: String) -> Result<Results<()>> {
         .await;
 
     if let Err(e) = ret {
-        tracing::error!(error = ?e, "error update user");
+        tracing::error!(error = ?e, "Error updating user");
         return Err(Errors::ErrInternalServerError(None));
     }
 
@@ -128,7 +128,7 @@ pub const SEND_CODE_KEY: &str = "send:code:";
 pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<Results<()>> {
     let code: u32 = rand::thread_rng().gen_range(1000..10000);
     let code_str = code.to_string();
-    tracing::debug!("send verify code {} {}", code_str, req.phone);
+    tracing::debug!("Send verify code {} {}", code_str, req.phone);
     let redis_key = format!("{}{}", SEND_CODE_KEY, req.phone);
 
     match cache::RedisClient::set(&redis_key, &code_str, Some(60)) {

@@ -12,10 +12,8 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 pub fn init() -> Router {
-    // 开放
     let open = Router::new().merge(route::open());
 
-    // 需授权
     let auth = Router::new()
         .layer(axum::middleware::from_fn(middleware::auth::handle))
         .merge(route::auth());

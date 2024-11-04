@@ -25,11 +25,8 @@ pub async fn handle(mut request: Request, next: Next) -> Response {
         }
         None => gen_trace_id(&mut request, &hostname),
     };
-    // 设置 trace span
     let span = tracing::info_span!("trace", hostname, trace_id);
-    // 进入span，生命周期内所有事件都关联到该span
     let _enter = span.enter();
-    // 设置返回header
     let mut response = next.run(request).await;
     response.headers_mut().insert(
         HeaderName::from_static(TRACE_KEY),
