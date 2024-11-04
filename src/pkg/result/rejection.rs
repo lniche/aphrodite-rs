@@ -23,7 +23,7 @@ impl IntoResponse for MyRejection {
                 JsonRejection::JsonDataError(e) => ApiErr::ErrData(Some(e.body_text())),
                 JsonRejection::JsonSyntaxError(e) => ApiErr::ErrData(Some(e.body_text())),
                 JsonRejection::MissingJsonContentType(e) => ApiErr::ErrData(Some(e.body_text())),
-                _ => ApiErr::ErrSystem(None),
+                _ => ApiErr::ErrInternalServerError(None),
             },
         };
         err.into_response()

@@ -30,7 +30,9 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
             cache_code,
             req.code
         );
-        return Err(ApiErr::ErrSystem(Some("验证码不正确".to_string())));
+        return Err(ApiErr::ErrInternalServerError(Some(
+            "验证码不正确".to_string(),
+        )));
     }
     let user_option = User::find()
         .filter(user::Column::Phone.eq(req.phone.clone()))
@@ -38,7 +40,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "Failed to retrieve user information");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?;
 
     let now = Utc::now().naive_utc();
@@ -61,7 +63,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
             .await
             .map_err(|e| {
                 tracing::error!(error = ?e, "Failed to update user");
-                ApiErr::ErrSystem(None)
+                ApiErr::ErrInternalServerError(None)
             })?;
     } else {
         let mut generator = SnowflakeGen::new(1);
@@ -69,7 +71,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         login_token = md5(format!("auth.{}.{}.{}", user_code, now, helper::nonce(16)).as_bytes());
         let user_no = cache::RedisClient::next_no().map_err(|e| {
             tracing::error!(error = ?e, "Failed to generate user_no");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?;
         let phone_suffix = &req.phone[req.phone.len().saturating_sub(4)..];
         let nickname_value = format!("A{}", phone_suffix);
@@ -87,7 +89,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         };
         User::insert(new_user).exec(db::conn()).await.map_err(|e| {
             tracing::error!(error = ?e, "Failed to create user");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?;
     }
 
@@ -95,7 +97,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         .to_auth_token()
         .map_err(|e| {
             tracing::error!(error = ?e, "Failed to encrypt identity");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?;
 
     let resp = LoginResp { access_token };
@@ -115,7 +117,7 @@ pub async fn logout(user_code: String) -> Result<ApiOK<()>> {
 
     if let Err(e) = ret {
         tracing::error!(error = ?e, "error update user");
-        return Err(ApiErr::ErrSystem(None));
+        return Err(ApiErr::ErrInternalServerError(None));
     }
 
     Ok(ApiOK(None))
@@ -133,7 +135,7 @@ pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<ApiOK<()>> {
         Ok(_) => Ok(ApiOK(None)),
         Err(e) => {
             tracing::error!("Failed to set value in Redis: {:?}", e);
-            Err(ApiErr::ErrSystem(None))
+            Err(ApiErr::ErrInternalServerError(None))
         }
     }
 }

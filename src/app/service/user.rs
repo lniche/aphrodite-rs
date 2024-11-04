@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, EntityTrait, Order, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set
+    ActiveModelTrait, ColumnTrait, EntityTrait, Order, PaginatorTrait, QueryFilter, QueryOrder,
+    QuerySelect, Set,
 };
 use serde::Serialize;
 
@@ -25,7 +26,7 @@ pub async fn info(user_code: String) -> Result<ApiOK<GetUserResp>> {
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "error find user");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?
         .ok_or(ApiErr::ErrNotFound(Some("账号不存在".to_string())))?;
 
@@ -75,7 +76,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
             .await
             .map_err(|e| {
                 tracing::error!(error = ?e, "error count user");
-                ApiErr::ErrSystem(None)
+                ApiErr::ErrInternalServerError(None)
             })?
             .unwrap_or_default();
     }
@@ -88,7 +89,7 @@ pub async fn list(query: HashMap<String, String>) -> Result<ApiOK<RespList>> {
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "error find user");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?;
     let mut resp = RespList {
         total,
@@ -114,7 +115,7 @@ pub async fn update(req: UpdateUserReq, user_code: String) -> Result<ApiOK<()>> 
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "error counting users");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?;
     if count == 0 {
         return Err(ApiErr::ErrNotFound(Some("账号不存在".to_string())));
@@ -131,7 +132,7 @@ pub async fn update(req: UpdateUserReq, user_code: String) -> Result<ApiOK<()>> 
 
     if let Err(e) = ret {
         tracing::error!(error = ?e, "error update user");
-        return Err(ApiErr::ErrSystem(None));
+        return Err(ApiErr::ErrInternalServerError(None));
     }
     Ok(ApiOK(None))
 }
@@ -143,7 +144,7 @@ pub async fn delete(user_code: String) -> Result<ApiOK<()>> {
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "error find user");
-            ApiErr::ErrSystem(None)
+            ApiErr::ErrInternalServerError(None)
         })?
         .ok_or(ApiErr::ErrNotFound(Some("账号不存在".to_string())))?;
 
@@ -153,7 +154,7 @@ pub async fn delete(user_code: String) -> Result<ApiOK<()>> {
 
     if let Err(e) = active_model.update(db::conn()).await {
         tracing::error!(error = ?e, "error update user");
-        return Err(ApiErr::ErrSystem(None));
+        return Err(ApiErr::ErrInternalServerError(None));
     }
     Ok(ApiOK(None))
 }

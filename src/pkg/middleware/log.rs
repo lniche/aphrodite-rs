@@ -86,7 +86,7 @@ async fn drain_body(request: Request, next: Next) -> Result<(Response, Option<St
         Ok(v) => v.to_bytes(),
         Err(e) => {
             tracing::error!(error = ?e, "error parse request body");
-            return Err(ApiErr::ErrSystem(None));
+            return Err(ApiErr::ErrInternalServerError(None));
         }
     };
 

@@ -23,11 +23,11 @@ where
 
 pub enum ApiErr {
     Error(i32, String),
-    ErrParams(Option<String>),
-    ErrAuth(Option<String>),
-    ErrPerm(Option<String>),
+    ErrBadRequest(Option<String>),
+    ErrUnauthorized(Option<String>),
     ErrNotFound(Option<String>),
-    ErrSystem(Option<String>),
+    ErrMethodNotAllow(Option<String>),
+    ErrInternalServerError(Option<String>),
     ErrData(Option<String>),
     ErrService(Option<String>),
 }
@@ -37,17 +37,18 @@ use ApiErr::*;
 impl IntoResponse for ApiErr {
     fn into_response(self) -> Response {
         let status: Status<()> = match self {
+            // common errors
             Error(code, msg) => Status::Err(code, msg),
-            ErrParams(msg) => Status::Err(10000, msg.unwrap_or(String::from("参数错误"))),
-            ErrAuth(msg) => Status::Err(20000, msg.unwrap_or(String::from("未授权，请先登录"))),
-            ErrPerm(msg) => Status::Err(30000, msg.unwrap_or(String::from("权限不足"))),
-            ErrNotFound(msg) => Status::Err(40000, msg.unwrap_or(String::from("数据不存在"))),
-            ErrSystem(msg) => Status::Err(
-                50000,
-                msg.unwrap_or(String::from("内部服务器错误，请稍后重试")),
-            ),
-            ErrData(msg) => Status::Err(60000, msg.unwrap_or(String::from("数据异常"))),
-            ErrService(msg) => Status::Err(70000, msg.unwrap_or(String::from("服务异常"))),
+            ErrBadRequest(msg) => Status::Err(400, msg.unwrap_or(String::from("Bad Request"))),
+            ErrUnauthorized(msg) => Status::Err(401, msg.unwrap_or(String::from("Unauthorized"))),
+            ErrNotFound(msg) => Status::Err(404, msg.unwrap_or(String::from("Not Found"))),
+            ErrMethodNotAllow(msg) => Status::Err(404, msg.unwrap_or(String::from("Method Not Allowed"))),
+            ErrInternalServerError(msg) => {
+                Status::Err(500, msg.unwrap_or(String::from("Internal Server Error")))
+            }
+            // more biz errors
+            ErrData(msg) => Status::Err(1001, msg.unwrap_or(String::from("Data Error"))),
+            ErrService(msg) => Status::Err(1002, msg.unwrap_or(String::from("Service Error"))),
         };
         Json(status.to_reply()).into_response()
     }

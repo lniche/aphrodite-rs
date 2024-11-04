@@ -32,7 +32,7 @@ pub async fn send_verify_code(
     WithRejection(Json(req), _): IRejection<Json<SendVerifyCodeReq>>,
 ) -> Result<ApiOK<()>> {
     if let Err(e) = req.validate() {
-        return Err(ApiErr::ErrParams(Some(e.to_string())));
+        return Err(ApiErr::ErrBadRequest(Some(e.to_string())));
     }
     service::auth::send_verify_code(req).await
 }
@@ -73,7 +73,7 @@ pub async fn login(
     WithRejection(Json(req), _): IRejection<Json<LoginReq>>,
 ) -> Result<ApiOK<LoginResp>> {
     if let Err(e) = req.validate() {
-        return Err(ApiErr::ErrParams(Some(e.to_string())));
+        return Err(ApiErr::ErrBadRequest(Some(e.to_string())));
     }
     service::auth::login(req, ip).await
 }
