@@ -6,22 +6,22 @@ use serde::Serialize;
 
 use super::status::Status;
 
-pub struct ApiOK<T>(pub Option<T>)
+pub struct Results<T>(pub Option<T>)
 where
     T: Serialize;
 
-impl<T> IntoResponse for ApiOK<T>
+impl<T> IntoResponse for Results<T>
 where
     T: Serialize,
 {
     fn into_response(self) -> Response {
-        let ApiOK(data) = self;
+        let Results(data) = self;
         let status = Status::OK(data);
         Json(status.to_reply()).into_response()
     }
 }
 
-pub enum ApiErr {
+pub enum Errors {
     Error(i32, String),
     ErrBadRequest(Option<String>),
     ErrUnauthorized(Option<String>),
@@ -32,9 +32,9 @@ pub enum ApiErr {
     ErrService(Option<String>),
 }
 
-use ApiErr::*;
+use Errors::*;
 
-impl IntoResponse for ApiErr {
+impl IntoResponse for Errors {
     fn into_response(self) -> Response {
         let status: Status<()> = match self {
             // common errors
@@ -42,7 +42,9 @@ impl IntoResponse for ApiErr {
             ErrBadRequest(msg) => Status::Err(400, msg.unwrap_or(String::from("Bad Request"))),
             ErrUnauthorized(msg) => Status::Err(401, msg.unwrap_or(String::from("Unauthorized"))),
             ErrNotFound(msg) => Status::Err(404, msg.unwrap_or(String::from("Not Found"))),
-            ErrMethodNotAllow(msg) => Status::Err(404, msg.unwrap_or(String::from("Method Not Allowed"))),
+            ErrMethodNotAllow(msg) => {
+                Status::Err(404, msg.unwrap_or(String::from("Method Not Allowed")))
+            }
             ErrInternalServerError(msg) => {
                 Status::Err(500, msg.unwrap_or(String::from("Internal Server Error")))
             }
@@ -54,4 +56,4 @@ impl IntoResponse for ApiErr {
     }
 }
 
-pub type Result<T> = std::result::Result<T, ApiErr>;
+pub type Result<T> = std::result::Result<T, Errors>;

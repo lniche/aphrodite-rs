@@ -11,7 +11,7 @@ use http_body_util::BodyExt;
 use hyper::HeaderMap;
 use time::macros::offset;
 
-use crate::pkg::result::response::ApiErr;
+use crate::pkg::result::response::Errors;
 use crate::pkg::util::{identity::Identity, xtime};
 
 pub async fn handle(request: Request, next: Next) -> Response {
@@ -63,7 +63,7 @@ fn header_to_string(h: &HeaderMap) -> String {
     }
 }
 
-async fn drain_body(request: Request, next: Next) -> Result<(Response, Option<String>), ApiErr> {
+async fn drain_body(request: Request, next: Next) -> Result<(Response, Option<String>), Errors> {
     let ok = match request
         .headers()
         .get(CONTENT_TYPE)
@@ -86,7 +86,7 @@ async fn drain_body(request: Request, next: Next) -> Result<(Response, Option<St
         Ok(v) => v.to_bytes(),
         Err(e) => {
             tracing::error!(error = ?e, "error parse request body");
-            return Err(ApiErr::ErrInternalServerError(None));
+            return Err(Errors::ErrInternalServerError(None));
         }
     };
 

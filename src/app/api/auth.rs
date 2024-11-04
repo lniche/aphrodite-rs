@@ -6,7 +6,7 @@ use validator::Validate;
 
 use crate::pkg::result::{
     rejection::IRejection,
-    response::{ApiErr, ApiOK, Result},
+    response::{Results, Errors, Result},
 };
 use crate::pkg::util::identity::Identity;
 
@@ -30,9 +30,9 @@ pub struct SendVerifyCodeReq {
 )]
 pub async fn send_verify_code(
     WithRejection(Json(req), _): IRejection<Json<SendVerifyCodeReq>>,
-) -> Result<ApiOK<()>> {
+) -> Result<Results<()>> {
     if let Err(e) = req.validate() {
-        return Err(ApiErr::ErrBadRequest(Some(e.to_string())));
+        return Err(Errors::ErrBadRequest(Some(e.to_string())));
     }
     service::auth::send_verify_code(req).await
 }
@@ -71,9 +71,9 @@ pub struct LoginResp {
 pub async fn login(
     Extension(ip): Extension<String>,
     WithRejection(Json(req), _): IRejection<Json<LoginReq>>,
-) -> Result<ApiOK<LoginResp>> {
+) -> Result<Results<LoginResp>> {
     if let Err(e) = req.validate() {
-        return Err(ApiErr::ErrBadRequest(Some(e.to_string())));
+        return Err(Errors::ErrBadRequest(Some(e.to_string())));
     }
     service::auth::login(req, ip).await
 }
@@ -88,6 +88,6 @@ pub async fn login(
     ),
     description = "用户退出登录接口"
 )]
-pub async fn logout(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
+pub async fn logout(Extension(identity): Extension<Identity>) -> Result<Results<()>> {
     service::auth::logout(identity.code()).await
 }

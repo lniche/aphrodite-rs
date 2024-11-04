@@ -1,9 +1,9 @@
-use crate::pkg::result::response::{ ApiOK, Result};
+use crate::pkg::result::response::{Result, Results};
 
-pub async fn ping() -> Result<ApiOK<String>> {
-    Ok(ApiOK(Some("pong".to_string())))
+pub async fn ping() -> Result<Results<String>> {
+    Ok(Results(Some("pong".to_string())))
 }
 
-pub async fn home() -> Result<ApiOK<String>> {
-    Ok(ApiOK(Some("Thank you for using aphrodite!".to_string())))
+pub async fn home() -> Result<Results<String>> {
+    Ok(Results(Some("Thank you for using aphrodite!".to_string())))
 }

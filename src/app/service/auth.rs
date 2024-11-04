@@ -5,7 +5,7 @@ use time::macros::offset;
 
 use crate::pkg::core::{cache, db};
 use crate::pkg::crypto::hash::md5;
-use crate::pkg::result::response::{ApiErr, ApiOK, Result};
+use crate::pkg::result::response::{Results, Errors, Result};
 use crate::pkg::util::snowflake::SnowflakeGen;
 use crate::pkg::util::{helper, identity::Identity, xtime};
 
@@ -15,7 +15,7 @@ use crate::app::model::user;
 
 use rand::Rng;
 
-pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
+pub async fn login(req: LoginReq, ip: String) -> Result<Results<LoginResp>> {
     let redis_key = format!("{}{}", SEND_CODE_KEY, req.phone);
     let cache_code: String = match cache::RedisClient::get(&redis_key) {
         Ok(value) => value,
@@ -30,7 +30,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
             cache_code,
             req.code
         );
-        return Err(ApiErr::ErrInternalServerError(Some(
+        return Err(Errors::ErrInternalServerError(Some(
             "验证码不正确".to_string(),
         )));
     }
@@ -40,7 +40,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         .await
         .map_err(|e| {
             tracing::error!(error = ?e, "Failed to retrieve user information");
-            ApiErr::ErrInternalServerError(None)
+            Errors::ErrInternalServerError(None)
         })?;
 
     let now = Utc::now().naive_utc();
@@ -63,7 +63,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
             .await
             .map_err(|e| {
                 tracing::error!(error = ?e, "Failed to update user");
-                ApiErr::ErrInternalServerError(None)
+                Errors::ErrInternalServerError(None)
             })?;
     } else {
         let mut generator = SnowflakeGen::new(1);
@@ -71,7 +71,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         login_token = md5(format!("auth.{}.{}.{}", user_code, now, helper::nonce(16)).as_bytes());
         let user_no = cache::RedisClient::next_no().map_err(|e| {
             tracing::error!(error = ?e, "Failed to generate user_no");
-            ApiErr::ErrInternalServerError(None)
+            Errors::ErrInternalServerError(None)
         })?;
         let phone_suffix = &req.phone[req.phone.len().saturating_sub(4)..];
         let nickname_value = format!("A{}", phone_suffix);
@@ -89,7 +89,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         };
         User::insert(new_user).exec(db::conn()).await.map_err(|e| {
             tracing::error!(error = ?e, "Failed to create user");
-            ApiErr::ErrInternalServerError(None)
+            Errors::ErrInternalServerError(None)
         })?;
     }
 
@@ -97,14 +97,14 @@ pub async fn login(req: LoginReq, ip: String) -> Result<ApiOK<LoginResp>> {
         .to_auth_token()
         .map_err(|e| {
             tracing::error!(error = ?e, "Failed to encrypt identity");
-            ApiErr::ErrInternalServerError(None)
+            Errors::ErrInternalServerError(None)
         })?;
 
     let resp = LoginResp { access_token };
-    Ok(ApiOK(Some(resp)))
+    Ok(Results(Some(resp)))
 }
 
-pub async fn logout(user_code: String) -> Result<ApiOK<()>> {
+pub async fn logout(user_code: String) -> Result<Results<()>> {
     let ret = User::update_many()
         .filter(user::Column::Id.eq(user_code))
         .col_expr(user::Column::LoginToken, Expr::value(""))
@@ -117,25 +117,25 @@ pub async fn logout(user_code: String) -> Result<ApiOK<()>> {
 
     if let Err(e) = ret {
         tracing::error!(error = ?e, "error update user");
-        return Err(ApiErr::ErrInternalServerError(None));
+        return Err(Errors::ErrInternalServerError(None));
     }
 
-    Ok(ApiOK(None))
+    Ok(Results(None))
 }
 
 pub const SEND_CODE_KEY: &str = "send:code:";
 
-pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<ApiOK<()>> {
+pub async fn send_verify_code(req: SendVerifyCodeReq) -> Result<Results<()>> {
     let code: u32 = rand::thread_rng().gen_range(1000..10000);
     let code_str = code.to_string();
     tracing::debug!("send verify code {} {}", code_str, req.phone);
     let redis_key = format!("{}{}", SEND_CODE_KEY, req.phone);
 
     match cache::RedisClient::set(&redis_key, &code_str, Some(60)) {
-        Ok(_) => Ok(ApiOK(None)),
+        Ok(_) => Ok(Results(None)),
         Err(e) => {
             tracing::error!("Failed to set value in Redis: {:?}", e);
-            Err(ApiErr::ErrInternalServerError(None))
+            Err(Errors::ErrInternalServerError(None))
         }
     }
 }

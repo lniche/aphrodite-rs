@@ -8,7 +8,7 @@ use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::pkg::result::response::{ApiOK, Result};
+use crate::pkg::result::response::{Results, Result};
 use crate::pkg::util::identity::Identity;
 use crate::{
     app::service::{self, user::RespList},
@@ -52,7 +52,7 @@ pub struct GetUserResp {
 pub async fn info(
     Extension(identity): Extension<Identity>,
     Path(user_code): Path<String>,
-) -> Result<ApiOK<GetUserResp>> {
+) -> Result<Results<GetUserResp>> {
     let user_code = if user_code.is_empty() && !identity.code().is_empty() {
         identity.code()
     } else {
@@ -64,7 +64,7 @@ pub async fn info(
 pub async fn list(
     Extension(_identity): Extension<Identity>,
     Query(query): Query<HashMap<String, String>>,
-) -> Result<ApiOK<RespList>> {
+) -> Result<Results<RespList>> {
     service::user::list(query).await
 }
 
@@ -93,7 +93,7 @@ pub struct UpdateUserReq {
 pub async fn update(
     Extension(identity): Extension<Identity>,
     WithRejection(Json(req), _): IRejection<Json<UpdateUserReq>>,
-) -> Result<ApiOK<()>> {
+) -> Result<Results<()>> {
     service::user::update(req, identity.code()).await
 }
 
@@ -107,6 +107,6 @@ pub async fn update(
     ),
     description = "用户删除接口"
 )]
-pub async fn delete(Extension(identity): Extension<Identity>) -> Result<ApiOK<()>> {
+pub async fn delete(Extension(identity): Extension<Identity>) -> Result<Results<()>> {
     service::user::delete(identity.code()).await
 }

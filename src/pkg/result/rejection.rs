@@ -5,7 +5,7 @@ use axum::{
 use axum_extra::extract::WithRejection;
 use thiserror::Error;
 
-use super::response::ApiErr;
+use super::response::Errors;
 
 #[derive(Debug, Error)]
 pub enum MyRejection {
@@ -20,10 +20,10 @@ impl IntoResponse for MyRejection {
     fn into_response(self) -> Response {
         let err = match self {
             MyRejection::JSONExtractor(x) => match x {
-                JsonRejection::JsonDataError(e) => ApiErr::ErrData(Some(e.body_text())),
-                JsonRejection::JsonSyntaxError(e) => ApiErr::ErrData(Some(e.body_text())),
-                JsonRejection::MissingJsonContentType(e) => ApiErr::ErrData(Some(e.body_text())),
-                _ => ApiErr::ErrInternalServerError(None),
+                JsonRejection::JsonDataError(e) => Errors::ErrData(Some(e.body_text())),
+                JsonRejection::JsonSyntaxError(e) => Errors::ErrData(Some(e.body_text())),
+                JsonRejection::MissingJsonContentType(e) => Errors::ErrData(Some(e.body_text())),
+                _ => Errors::ErrInternalServerError(None),
             },
         };
         err.into_response()
