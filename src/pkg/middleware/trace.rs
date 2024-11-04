@@ -4,7 +4,7 @@ use nanoid::nanoid;
 
 use crate::pkg::crypto::hash;
 
-pub const TRACE_KEY: &str = "x-trace-id";
+pub const TRACE_KEY: &str = "x-request-id";
 
 pub async fn handle(mut request: Request, next: Next) -> Response {
     let hostname = hostname::get()

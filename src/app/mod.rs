@@ -7,7 +7,6 @@ pub mod service;
 use crate::pkg::core::config;
 
 pub async fn serve() {
-    // run it with hyper on localhost:8000
     let addr = config::global().get_int("app.port").unwrap_or(8000);
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", addr))

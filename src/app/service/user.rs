@@ -43,75 +43,6 @@ pub async fn info(user_code: String) -> Result<Results<GetUserResp>> {
     Ok(Results(Some(resp)))
 }
 
-#[derive(Debug, Serialize)]
-pub struct RespInfo {
-    pub id: u64,
-    pub username: String,
-    login_at: NaiveDateTime,
-    created_at: NaiveDateTime,
-}
-
-#[derive(Debug, Serialize)]
-pub struct RespList {
-    pub total: i64,
-    pub list: Vec<RespInfo>,
-}
-
-pub async fn list(query: HashMap<String, String>) -> Result<Results<RespList>> {
-    let mut builder = User::find();
-    if let Some(username) = query.get("username") {
-        if !username.is_empty() {
-            builder = builder.filter(user::Column::Username.eq(username.to_owned()));
-        }
-    }
-
-    let mut total: i64 = 0;
-    let (offset, limit) = helper::query_page(&query);
-    // Only calculate the total count on the first page
-    if offset == 0 {
-        total = builder
-            .clone()
-            .select_only()
-            .column_as(user::Column::Id.count(), "count")
-            .into_tuple::<i64>()
-            .one(db::conn())
-            .await
-            .map_err(|e| {
-                tracing::error!(error = ?e, "Error counting users");
-                Errors::ErrInternalServerError(None)
-            })?
-            .unwrap_or_default();
-    }
-
-    let models = builder
-        .order_by(user::Column::Id, Order::Desc)
-        .offset(offset)
-        .limit(limit)
-        .all(db::conn())
-        .await
-        .map_err(|e| {
-            tracing::error!(error = ?e, "Error finding users");
-            Errors::ErrInternalServerError(None)
-        })?;
-
-    let mut resp = RespList {
-        total,
-        list: Vec::with_capacity(models.len()),
-    };
-
-    for model in models {
-        let info = RespInfo {
-            id: model.id,
-            username: model.username,
-            login_at: model.login_at,
-            created_at: model.created_at,
-        };
-        resp.list.push(info);
-    }
-
-    Ok(Results(Some(resp)))
-}
-
 pub async fn update(req: UpdateUserReq, user_code: String) -> Result<Results<()>> {
     let count = User::find()
         .filter(user::Column::UserCode.eq(user_code.clone()))
@@ -158,7 +89,7 @@ pub async fn delete(user_code: String) -> Result<Results<()>> {
         )))?;
 
     let mut active_model: user::ActiveModel = model.into();
-    active_model.deleted = Set(true);
+    active_model.status = Set(3);
     active_model.deleted_at = Set(Utc::now().naive_utc());
 
     if let Err(e) = active_model.update(db::conn()).await {

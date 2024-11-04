@@ -19,6 +19,8 @@ pub struct Model {
     pub client_ip: String,
     pub login_at: DateTime,
     pub login_token: String,
+    pub avatar: String,
+    pub status: u8,
     #[sea_orm(primary_key)]
     pub id: u64,
     pub created_at: DateTime,
@@ -26,9 +28,7 @@ pub struct Model {
     pub deleted_at: DateTime,
     pub created_by: String,
     pub updated_by: String,
-    pub version: u8,
-    #[sea_orm(column_name = "is_deleted")]
-    pub deleted: bool,
+    pub version: u32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

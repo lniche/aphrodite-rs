@@ -74,7 +74,7 @@ pub async fn login(req: LoginReq, ip: String) -> Result<Results<LoginResp>> {
             Errors::ErrInternalServerError(None)
         })?;
         let phone_suffix = &req.phone[req.phone.len().saturating_sub(4)..];
-        let nickname_value = format!("A{}", phone_suffix);
+        let nickname_value = format!("SUGAR_{}", phone_suffix);
         let new_user = user::ActiveModel {
             phone: Set(req.phone.clone()),
             nickname: Set(nickname_value),

@@ -1,9 +1,4 @@
-use std::collections::HashMap;
-
-use axum::{
-    extract::{Path, Query},
-    Extension, Json,
-};
+use axum::{extract::Path, Extension, Json};
 use axum_extra::extract::WithRejection;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -11,7 +6,7 @@ use utoipa::ToSchema;
 use crate::pkg::result::response::{Result, Results};
 use crate::pkg::util::identity::Identity;
 use crate::{
-    app::service::{self, user::RespList},
+    app::service::{self},
     pkg::result::rejection::IRejection,
 };
 
@@ -19,7 +14,7 @@ use crate::{
 // Response structure for getting user information
 pub struct GetUserResp {
     // User's unique identifier code
-    #[schema(example = "S8000")]
+    #[schema(example = "A8000")]
     pub user_code: String,
 
     // User's login name
@@ -59,13 +54,6 @@ pub async fn info(
         user_code
     };
     service::user::info(user_code).await
-}
-
-pub async fn list(
-    Extension(_identity): Extension<Identity>,
-    Query(query): Query<HashMap<String, String>>,
-) -> Result<Results<RespList>> {
-    service::user::list(query).await
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]

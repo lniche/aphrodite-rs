@@ -22,8 +22,8 @@ pub fn init() -> Router {
     #[openapi(
         info(
             title = "Aphrodite API",
-            version = "1.0.0",
             description = "API Description",
+            version = "1.0.0",
         ),
         paths(auth::login, auth::logout,auth::send_verify_code,user::info,user::update,user::delete),
         // components(schemas(ReqLogin, RespLogin))
@@ -31,7 +31,7 @@ pub fn init() -> Router {
     struct ApiDoc;
 
     pub fn generate_openapi_json() -> utoipa::openapi::OpenApi {
-        let dev_address = "http://localhost:8000".to_string();
+        let dev_address = "http://127.0.0.1:8000".to_string();
         let test_address = "http://test.aphrodite.com".to_string();
 
         let servers = vec![
@@ -75,7 +75,7 @@ pub fn init() -> Router {
 
     Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
-        .route("/", get(health::home))
+        .route("/", get(health::root))
         .route("/ping", get(health::ping))
         .nest("/v1", open.merge(auth))
         .layer(axum::middleware::from_fn(
