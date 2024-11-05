@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::pkg::result::response::{Result, Results};
+use crate::pkg::result::status::Resp;
 use crate::pkg::util::identity::Identity;
 use crate::{
     app::service::{self},
@@ -34,7 +35,7 @@ pub struct GetUserResp {
     pub phone: String,
 }
 
-// User information interface
+// User Info
 #[utoipa::path(
     get,
     path = "/v1/user",
@@ -42,7 +43,10 @@ pub struct GetUserResp {
     security(
         ("bearer_auth" = []) 
     ),
-    description = "User information interface"
+    responses(
+        (status = 200, body = GetUserResp, description="Successful Response")
+    ),
+    summary = "User Info"
 )]
 pub async fn info(
     Extension(identity): Extension<Identity>,
@@ -68,7 +72,7 @@ pub struct UpdateUserReq {
     pub email: String,
 }
 
-// User update interface
+// User Update
 #[utoipa::path(
     put,
     path = "/v1/user",
@@ -76,7 +80,11 @@ pub struct UpdateUserReq {
     security(
         ("bearer_auth" = []) 
     ),
-    description = "User update interface"
+    request_body = UpdateUserReq,
+    summary = "User Update",
+    responses(
+        (status = 200, body = Resp, description="Successful Response")
+    )
 )]
 pub async fn update(
     Extension(identity): Extension<Identity>,
@@ -85,7 +93,7 @@ pub async fn update(
     service::user::update(req, identity.code()).await
 }
 
-// User delete interface
+// User Delete
 #[utoipa::path(
     delete,
     path = "/v1/user",
@@ -93,7 +101,10 @@ pub async fn update(
     security(
         ("bearer_auth" = []) 
     ),
-    description = "User delete interface"
+    summary = "User Delete",
+    responses(
+        (status = 200, body = Resp, description="Successful Response")
+    )
 )]
 pub async fn delete(Extension(identity): Extension<Identity>) -> Result<Results<()>> {
     service::user::delete(identity.code()).await

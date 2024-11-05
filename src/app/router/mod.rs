@@ -5,6 +5,7 @@ use crate::app::{
     api::{auth, health, user},
     middleware,
 };
+use crate::pkg::result::status::Resp;
 use axum::{routing::get, Router};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::{ComponentsBuilder, OpenApiBuilder, ServerBuilder};
@@ -55,6 +56,7 @@ pub fn init() -> Router {
                     .schema_from::<SendVerifyCodeReq>()
                     .schema_from::<UpdateUserReq>()
                     .schema_from::<GetUserResp>()
+                    .schema_from::<Resp>()
                     .security_scheme(
                         "bearer_auth",
                         SecurityScheme::Http(

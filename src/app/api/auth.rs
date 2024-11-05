@@ -7,6 +7,7 @@ use validator::Validate;
 use crate::pkg::result::{
     rejection::IRejection,
     response::{Errors, Result, Results},
+    status::Resp,
 };
 use crate::pkg::util::identity::Identity;
 
@@ -20,13 +21,16 @@ pub struct SendVerifyCodeReq {
     pub phone: String,
 }
 
-// Send verification code
+// Send Verification Code
 #[utoipa::path(
     post,
     path = "/v1/send-code",
-    tag = "Authentication Module",
+    tag = "Auth Module",
     request_body = SendVerifyCodeReq,
-    description = "Send verification SMS"
+    summary = "Send Verification Code",
+    responses(
+        (status = 200, body = Resp, description="Successful Response")
+    )
 )]
 pub async fn send_verify_code(
     WithRejection(Json(req), _): IRejection<Json<SendVerifyCodeReq>>,
@@ -57,16 +61,16 @@ pub struct LoginResp {
     pub access_token: String,
 }
 
-// User login interface
+// User Registration/Login
 #[utoipa::path(
     post,
     path = "/v1/login",
-    tag = "Authentication Module",
+    tag = "Auth Module",
     request_body = LoginReq,
     responses(
-        (status = 200, description = "Successfully retrieved user information", body = LoginResp)
+        (status = 200, body = LoginResp, description="Successful Response")
     ),
-    description = "User login interface"
+    summary = "User Registration/Login"
 )]
 pub async fn login(
     Extension(ip): Extension<String>,
@@ -78,15 +82,18 @@ pub async fn login(
     service::auth::login(req, ip).await
 }
 
-// User logout interface
+// User Logout
 #[utoipa::path(
     post,
     path = "/v1/logout",
-    tag = "Authentication Module",
+    tag = "Auth Module",
     security(
         ("bearer_auth" = []) 
     ),
-    description = "User logout interface"
+    summary = "User Logout",
+    responses(
+        (status = 200, body = Resp, description="Successful Response")
+    )
 )]
 pub async fn logout(Extension(identity): Extension<Identity>) -> Result<Results<()>> {
     service::auth::logout(identity.code()).await

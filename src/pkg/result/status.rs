@@ -1,5 +1,13 @@
 use serde::Serialize;
+use utoipa::ToSchema;
 
+#[derive(Serialize, ToSchema)]
+pub struct Resp {
+    #[schema(example = "0")]
+    pub code: i32,
+    #[schema(example = "ok")]
+    pub message: String,
+}
 #[derive(Serialize)]
 pub struct Reply<T>
 where

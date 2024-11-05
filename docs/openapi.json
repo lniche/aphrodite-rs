@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000",
+      "url": "http://127.0.0.1:8000",
       "description": "Development Environment"
     },
     {
@@ -22,9 +22,9 @@
     "/v1/login": {
       "post": {
         "tags": [
-          "Authentication Module"
+          "Auth Module"
         ],
-        "description": "User login interface",
+        "summary": "User Registration/Login",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -38,7 +38,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully retrieved user information",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
@@ -53,11 +53,22 @@
     "/v1/logout": {
       "post": {
         "tags": [
-          "Authentication Module"
+          "Auth Module"
         ],
-        "description": "User logout interface",
+        "summary": "User Logout",
         "operationId": "logout",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resp"
+                }
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearer_auth": []
@@ -68,9 +79,9 @@
     "/v1/send-code": {
       "post": {
         "tags": [
-          "Authentication Module"
+          "Auth Module"
         ],
-        "description": "Send verification SMS",
+        "summary": "Send Verification Code",
         "operationId": "send_verify_code",
         "requestBody": {
           "content": {
@@ -82,7 +93,18 @@
           },
           "required": true
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resp"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/user": {
@@ -90,9 +112,20 @@
         "tags": [
           "User Module"
         ],
-        "description": "User information interface",
+        "summary": "User Info",
         "operationId": "info",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserResp"
+                }
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearer_auth": []
@@ -103,7 +136,7 @@
         "tags": [
           "User Module"
         ],
-        "description": "User update interface",
+        "summary": "User Update",
         "operationId": "update",
         "requestBody": {
           "content": {
@@ -115,7 +148,18 @@
           },
           "required": true
         },
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resp"
+                }
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearer_auth": []
@@ -126,9 +170,20 @@
         "tags": [
           "User Module"
         ],
-        "description": "User delete interface",
+        "summary": "User Delete",
         "operationId": "delete",
-        "responses": {},
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resp"
+                }
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearer_auth": []
@@ -163,7 +218,7 @@
           },
           "user_code": {
             "type": "string",
-            "example": "S8000"
+            "example": "A8000"
           },
           "user_no": {
             "type": "integer",
@@ -199,6 +254,24 @@
           "access_token": {
             "type": "string",
             "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "Resp": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "example": "0"
+          },
+          "message": {
+            "type": "string",
+            "example": "ok"
           }
         }
       },
