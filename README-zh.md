@@ -80,7 +80,7 @@ cd config
 mv config.toml.example config.toml
 
 # 3. 处理依赖
-# 确保你已经安装了 Rust 和 Cargo
+# 确保你已经安装了 Rust 和 Cargo 环境
 cargo build
 
 # 4. 初始化数据库

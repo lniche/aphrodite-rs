@@ -36,12 +36,12 @@ Icon?
 # Temporary files
 *.tmp
 *.log*
+logs/
+log/
+data/
 
 # Environment files
 .env
 *.env
 
-
-deploy/docker-compose/data
-deploy/docker-compose/logs
 config.toml
