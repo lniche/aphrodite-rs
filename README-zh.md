@@ -1,4 +1,4 @@
-# Aphrodite Rust API 快速开发脚手架
+# Aphrodite Axum API Scaffold
 
 Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) 开发的模板项目，旨在帮助开发者快速上手，深入理解框架的使用流程。该项目提供了全面的示例代码和配置，涵盖了常见的开发场景，以便于学习和实践。此外，Aphrodite 还包含容器部署模板，使得项目在现代云环境中能够轻松部署与管理，助力开发者高效构建和发布应用。
 
@@ -56,16 +56,17 @@ Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) �
 
 ```
 .
-├── api/                  # 出入参定义，包含所有的请求和响应结构体
-├── cmd/                  # 应用程序入口，包含不同的子命令，如启动、迁移等
-├── config/               # 配置文件，存储应用的配置项（如数据库、第三方服务等）
-├── docs/                 # 项目的文档，包含 API 文档（如 Swagger 文件）
-├── deploy/               # 部署相关文件，如 Dockerfile、docker-compose.yml 等
-├── internal/             # 应用程序的核心业务代码，按照分层架构组织
-├── pkg/                  # 公共模块，包含共享的工具库，如日志、配置加载、HTTP 请求等
-├── scripts/              # 自动化脚本，如部署、测试、构建等
-├── storage/              # 存储文件，如日志文件、数据库文件及其他持久化数据
-└── README.md             # 项目说明文件，包含项目简介、安装和使用说明等
+├── bin/                  # 可执行脚本
+├── config/               # 配置文件
+├── database/             # 数据库相关
+├── deploy/               # 部署相关文件
+├── docs/                 # 项目文档
+├── src/                  # 核心目录
+│   ├── app/              # 应用核心代码
+│   ├── pkg/              # 公共模块
+├── storage/              # 文件存储
+├── tests/                # 测试文件
+└── README.md             # 项目说明
 ```
 
 ## 本地运行

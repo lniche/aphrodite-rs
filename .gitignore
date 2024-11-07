@@ -36,9 +36,6 @@ Icon?
 # Temporary files
 *.tmp
 *.log*
-logs/
-log/
-data/
 
 # Environment files
 .env
