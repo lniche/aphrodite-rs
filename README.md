@@ -90,7 +90,7 @@ mv config.toml.example config.toml
 cargo build
 
 # 4. Initialize the database
-database/db.sql
+database/init.sql
 
 # 5. Start the service
 cargo run -- serve

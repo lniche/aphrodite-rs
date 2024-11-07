@@ -85,7 +85,7 @@ mv config.toml.example config.toml
 cargo build
 
 # 4. 初始化数据库
-database/db.sql
+database/init.sql
 
 # 5. 启动服务
 cargo run -- serve
