@@ -91,6 +91,10 @@ database/db.sql
 cargo run -- serve
 ```
 
+## Repo Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/7d3f9b2c6f3ee0be57460b614334ff2739f36b92.svg "Repobeats analytics image")
+
 ## 贡献
 
 如果你有任何建议或想法，欢迎创建 Issue 或直接提交 Pull Request。
