@@ -27,7 +27,7 @@ pub async fn handle(request: Request, next: Next) -> Response {
     );
     cors_headers.insert(
         ACCESS_CONTROL_EXPOSE_HEADERS,
-        HeaderValue::from_static("x-request-id"),
+        HeaderValue::from_static("X-Request-ID"),
     );
 
     if request.method() == Method::OPTIONS {

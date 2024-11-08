@@ -57,7 +57,7 @@ Aphrodite is a template project developed based on [api-tpl-rs](https://github.c
 
 - **Swagger document integration**: Automatically generates API documents for front-end development and testing.
 
-## Directory structure
+## Structure
 
 ```
 .
@@ -74,7 +74,7 @@ Aphrodite is a template project developed based on [api-tpl-rs](https://github.c
 └── README.md # project description
 ```
 
-## Local operation
+## Run Local
 
 ```bash
 # 1. Clone the project code base
