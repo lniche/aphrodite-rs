@@ -1,0 +1,39 @@
+# Root of the .editorconfig file
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Settings for Go (Golang)
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# Settings for Rust
+[*.rs]
+indent_style = space
+indent_size = 4
+
+# Settings for Kotlin
+[*.kt]
+indent_style = space
+indent_size = 4
+
+# Settings for Ruby
+[*.rb]
+indent_style = space
+indent_size = 2
+
+# Settings for PHP
+[*.php]
+indent_style = space
+indent_size = 4
+
+# Settings for Python
+[*.py]
+indent_style = space
+indent_size = 4
