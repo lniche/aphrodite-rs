@@ -100,9 +100,24 @@ cargo run -- serve
 如果你有任何建议或想法，欢迎创建 Issue 或直接提交 Pull Request。
 
 1. Fork 这个仓库。
-2. 创建一个新的分支：git checkout -b feature/your-feature
-3. 提交你的更改：git commit -m 'Add new feature'
-4. 推送到你的分支：git push origin feature/your-feature
+2. 创建一个新的分支：
+
+```
+git checkout -b feature/your-feature
+```
+
+3. 提交你的更改：
+
+```
+git commit -m 'Add new feature'
+```
+
+4. 推送到你的分支：
+
+```
+git push origin feature/your-feature
+```
+
 5. 提交 Pull Request。
 
 ## 许可证

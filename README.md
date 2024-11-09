@@ -104,11 +104,20 @@ cargo run -- serve
 
 If you have any suggestions or ideas, please create an issue or submit a Pull Request directly.
 
-1. Fork this repository.
-2. Create a new branch: git checkout -b feature/your-feature
-3. Commit your changes: git commit -m 'Add new feature'
-4. Push to your branch: git push origin feature/your-feature
-5. Submit a Pull Request.
+1. **Fork** this repository.
+2. **Create** a new branch: 
+```
+git checkout -b feature/your-feature
+```
+3. **Commit** your changes: 
+```
+git commit -m 'Add new feature'
+```
+4. **Push** to your branch: 
+```
+git push origin feature/your-feature
+```
+5. **Submit** a Pull Request.
 
 ## License
 
