@@ -13,9 +13,10 @@ pub async fn serve() {
         .unwrap_or("0.0.0.0".to_string());
     let host_port = format!("{}:{}", host, port);
     let docs_addr = format!("{}/swagger-ui/index.html", host_port);
-    tracing::info!("server start host = http://{}", host_port);
-    tracing::info!("docs addr = http://{}", docs_addr);
-
+    tracing::info!("===============================");
+    tracing::info!("Listening on http://{}", host_port);
+    tracing::info!("Docs addr http://{}", docs_addr);
+    tracing::info!("===============================");
     let listener = tokio::net::TcpListener::bind(host_port).await.unwrap();
     axum::serve(listener, router::init()).await.unwrap();
 }
