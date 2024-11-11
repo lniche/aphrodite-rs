@@ -1,5 +1,7 @@
 # Aphrodite Axum API Scaffold
 
+[English](README.md) | [简体中文](README-zh.md)
+
 Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) 开发的模板项目，旨在帮助开发者快速上手，深入理解框架的使用流程。该项目提供了全面的示例代码和配置，涵盖了常见的开发场景，以便于学习和实践。此外，Aphrodite 还包含容器部署模板，使得项目在现代云环境中能够轻松部署与管理，助力开发者高效构建和发布应用。
 
 ## 技术栈
