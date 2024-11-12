@@ -71,7 +71,7 @@
         },
         "security": [
           {
-            "bearer_auth": []
+            "BearerAuth": []
           }
         ]
       }
@@ -128,7 +128,7 @@
         },
         "security": [
           {
-            "bearer_auth": []
+            "BearerAuth": []
           }
         ]
       },
@@ -162,7 +162,7 @@
         },
         "security": [
           {
-            "bearer_auth": []
+            "BearerAuth": []
           }
         ]
       },
@@ -186,7 +186,7 @@
         },
         "security": [
           {
-            "bearer_auth": []
+            "BearerAuth": []
           }
         ]
       }
@@ -306,7 +306,7 @@
       }
     },
     "securitySchemes": {
-      "bearer_auth": {
+      "BearerAuth": {
         "type": "http",
         "scheme": "bearer"
       }

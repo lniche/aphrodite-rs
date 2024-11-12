@@ -41,7 +41,7 @@ pub struct GetUserResp {
     path = "/v1/user",
     tag = "User Module",
     security(
-        ("bearer_auth" = []) 
+        ("Authorization" = []) 
     ),
     responses(
         (status = 200, body = GetUserResp, description="Successful Response")
@@ -78,7 +78,7 @@ pub struct UpdateUserReq {
     path = "/v1/user",
     tag = "User Module",
     security(
-        ("bearer_auth" = []) 
+        ("Authorization" = []) 
     ),
     request_body = UpdateUserReq,
     summary = "User Update",
@@ -99,7 +99,7 @@ pub async fn update(
     path = "/v1/user",
     tag = "User Module",
     security(
-        ("bearer_auth" = []) 
+        ("Authorization" = []) 
     ),
     summary = "User Delete",
     responses(

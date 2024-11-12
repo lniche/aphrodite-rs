@@ -88,7 +88,7 @@ pub async fn login(
     path = "/v1/logout",
     tag = "Auth Module",
     security(
-        ("bearer_auth" = []) 
+        ("Authorization" = []) 
     ),
     summary = "User Logout",
     responses(

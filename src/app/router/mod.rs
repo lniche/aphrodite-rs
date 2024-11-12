@@ -58,9 +58,13 @@ pub fn init() -> Router {
                     .schema_from::<GetUserResp>()
                     .schema_from::<Resp>()
                     .security_scheme(
-                        "bearer_auth",
+                        "Authorization",
                         SecurityScheme::Http(
-                            HttpBuilder::new().scheme(HttpAuthScheme::Bearer).build(),
+                            HttpBuilder::new()
+                                .scheme(HttpAuthScheme::Bearer)
+                                .bearer_format("JWT")
+                                .description(Some("JWT Bearer Token authentication"))
+                                .build(),
                         ),
                     )
                     .build(),
