@@ -1,6 +1,6 @@
 FROM rust:1.80 as builder
 
-WORKDIR /api_rs
+WORKDIR /app
 
 COPY . .
 
@@ -8,15 +8,16 @@ RUN cargo build --release
 
 FROM debian:bullseye-slim
 
-WORKDIR /bin
+WORKDIR /app
 
 # Note: Some shared libraries may need to install the extra-runtime-dependencies.
 # RUN apt-get update && apt-get install -y extra-runtime-dependencies && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /api_tpl/target/release/api_rs .
+COPY --from=builder /app/target/release/app .
+COPY --from=builder /app/config.toml.example ./config.toml
 
 EXPOSE 8000
 
-ENTRYPOINT ["./api_rs"]
+ENTRYPOINT ["./aphrodite-rs"]
 
-CMD ["serve", "--config", "/data/config.toml"]
+CMD ["serve", "--config", "config.toml"]

@@ -1,25 +1,57 @@
-version: '3'
+version: "3.8"
 
 services:
-  user-db:
-    image: mysql:8.0.31-debian
-    hostname: user-db
-    container_name: user-db
+  db:
+    image: postgres:17-alpine
+    container_name: db
     ports:
-      - 3380:3306
+      - "5432:5432"
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_ROOT_HOST=%
-      - MYSQL_DATABASE=user
-    volumes:
-      - ./data/mysql/user:/var/lib/mysql
-      - ./conf/mysql/conf.d:/etc/mysql/conf.d
-  cache-redis:
-    image: redis:6-alpine
-    hostname: cache-redis
-    volumes:
-      - ./data/redis/cache/:/data
-      - ./conf/redis/cache/redis.conf:/etc/redis/redis.conf
+      - POSTGRES_DB=test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123123
+      - TZ=UTC
+      - LANG=en_US.UTF-8
+    networks:
+      - aphrodite-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "test", "-h", "db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cache:
+    image: redis:7-alpine
+    container_name: cache
     ports:
-      - 6350:6379
-    command: [ "redis-server","/etc/redis/redis.conf" ]
+      - "6379:6379"
+    networks:
+      - aphrodite-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  api:
+    image: aphrodite-rs:latest
+    container_name: api
+    ports:
+      - "8000:8000"
+    networks:
+      - aphrodite-network
+    restart: unless-stopped
+    depends_on:
+      - db
+      - cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  aphrodite-network:
+    driver: bridge

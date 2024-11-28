@@ -1,24 +1,30 @@
-ARG RUBY_VERSION=3.3.5
-FROM ruby:${RUBY_VERSION}-slim-bullseye
-
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends \
-    apt-utils \
-    build-essential \
-    curl \
-    git \
-    imagemagick \
-    iproute2 \
-    libpq-dev \
-    openssh-client \
-    postgresql-client \
-    vim
-
-RUN gem install bundler
-RUN gem install foreman
-
-# Install Node.js 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+FROM rust:1.80
 
 WORKDIR /workspace
+
+RUN apt-get update && \
+    apt-get install -y \
+    build-essential \
+    libssl-dev \
+    pkg-config \
+    git \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rustup component add rustfmt && \
+    rustup component add clippy && \
+    rustup component add rust-src
+
+RUN rustup toolchain install nightly && \
+    rustup component add rust-analyzer --toolchain nightly
+
+RUN rustup component add llvm-tools-preview && \
+    cargo install cargo-watch && \
+    cargo install cargo-edit
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["/bin/bash"]

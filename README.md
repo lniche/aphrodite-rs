@@ -64,7 +64,6 @@ Aphrodite is a template project developed based on [api-tpl-rs](https://github.c
 ```
 .
 ├── bin/        # Executable scripts
-├── config/     # Configuration files
 ├── database/   # Database files
 ├── deploy/     # Deployment files
 ├── docs/       # Documentation
@@ -84,7 +83,6 @@ git clone https://github.com/lniche/aphrodite-rs.git
 cd aphrodite-rs
 
 # 2. Configuration file
-cd config
 mv config.toml.example config.toml
 
 # 3. Handle dependencies
@@ -107,15 +105,15 @@ cargo run -- serve
 If you have any suggestions or ideas, please create an issue or submit a Pull Request directly.
 
 1. **Fork** this repository.
-2. **Create** a new branch: 
+2. **Create** a new branch:
 ```
 git checkout -b feature/your-feature
 ```
-3. **Commit** your changes: 
+3. **Commit** your changes:
 ```
 git commit -m 'Add new feature'
 ```
-4. **Push** to your branch: 
+4. **Push** to your branch:
 ```
 git push origin feature/your-feature
 ```

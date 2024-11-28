@@ -59,7 +59,6 @@ Aphrodite 是一个基于 [api-tpl-rs](https://github.com/shenghui0779/yiirs) �
 ```
 .
 ├── bin/                  # 可执行脚本
-├── config/               # 配置文件
 ├── database/             # 数据库相关
 ├── deploy/               # 部署相关文件
 ├── docs/                 # 项目文档
@@ -79,7 +78,6 @@ git clone https://github.com/lniche/aphrodite-rs.git
 cd aphrodite-rs
 
 # 2. 配置文件
-cd config
 mv config.toml.example config.toml
 
 # 3. 处理依赖

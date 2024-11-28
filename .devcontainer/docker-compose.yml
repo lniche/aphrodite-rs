@@ -1,47 +1,46 @@
-version: "3"
-
+version: '3.8'
 services:
   app:
     build:
-      context: ..
-      dockerfile: .devcontainer/Dockerfile
-
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ..:/workspace:cached
-      - bundle_cache:/bundle
-
+      - .:/workspace
+      - cargo-cache:/usr/local/cargo
     ports:
-      - "3000:3000"
-
-    command: sleep infinity
-
+      - "8080:8080"
     environment:
-      DB_HOST: db
-      HOST: "0.0.0.0"
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      BUNDLE_PATH: /bundle
-
+      - RUST_BACKTRACE=1
+    command: ["cargo", "run"]
+    networks:
+      - container-network
     depends_on:
       - db
-      - redis
-
-  redis:
-    image: redis:latest
+      - cache
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    networks:
+      - container-network
   db:
     image: postgres:latest
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB=test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123123
+      - TZ=UTC
+      - LANG=en_US.UTF-8
     ports:
       - "5432:5432"
-
+    networks:
+      - container-network
 volumes:
   postgres-data:
-  bundle_cache:
+networks:
+  container-network:
+    driver: bridge
