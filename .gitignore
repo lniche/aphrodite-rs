@@ -42,3 +42,4 @@ Icon?
 *.env
 
 config.toml
+.idea
