@@ -1,6 +1,6 @@
 # Aphrodite Axum API Scaffold
 
-[English](README.md) | [简体中文](README-zh.md)
+[English](README.md) | [简体中文](README-zh.md) | [日本語](README-ja)
 
 Aphrodite is a template project developed based on [api-tpl-rs](https://github.com/shenghui0779/yiirs), which aims to help developers get started quickly and deeply understand the use process of the framework. The project provides comprehensive sample code and configuration, covering common development scenarios, for easy learning and practice. In addition, Aphrodite also includes container deployment templates, making the project easy to deploy and manage in modern cloud environments, helping developers to efficiently build and release applications.
 
@@ -63,7 +63,7 @@ Aphrodite is a template project developed based on [api-tpl-rs](https://github.c
 
 ```
 .
-├── bin/        # Executable scripts
+├── scripts/    # Executable scripts
 ├── database/   # Database files
 ├── deploy/     # Deployment files
 ├── docs/       # Documentation
@@ -90,7 +90,7 @@ mv config.toml.example config.toml
 cargo build
 
 # 4. Initialize the database
-database/init.sql
+database/migrations/V1.0.0__initial_schema.sql
 
 # 5. Start the service
 cargo run -- serve
@@ -99,25 +99,6 @@ cargo run -- serve
 ## Repo Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/7d3f9b2c6f3ee0be57460b614334ff2739f36b92.svg "Repobeats analytics image")
-
-## Contribution
-
-If you have any suggestions or ideas, please create an issue or submit a Pull Request directly.
-
-1. **Fork** this repository.
-2. **Create** a new branch:
-```
-git checkout -b feature/your-feature
-```
-3. **Commit** your changes:
-```
-git commit -m 'Add new feature'
-```
-4. **Push** to your branch:
-```
-git push origin feature/your-feature
-```
-5. **Submit** a Pull Request.
 
 ## License
 

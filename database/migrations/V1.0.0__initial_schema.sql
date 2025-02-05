@@ -11,6 +11,8 @@ CREATE TABLE "public"."t_user" (
   "client_ip" text COLLATE "pg_catalog"."default",
   "login_at" timestamptz(6),
   "login_token" text COLLATE "pg_catalog"."default",
+  "avatar" text COLLATE "pg_catalog"."default",
+  "status" int2 DEFAULT 1,
   "id" int8 NOT NULL DEFAULT nextval('t_user_id_seq'::regclass),
   "created_at" timestamptz(6),
   "updated_at" timestamptz(6),
@@ -18,15 +20,14 @@ CREATE TABLE "public"."t_user" (
   "created_by" text COLLATE "pg_catalog"."default",
   "updated_by" text COLLATE "pg_catalog"."default",
   "version" int8 DEFAULT 1,
-  "is_deleted" bool DEFAULT false,
   CONSTRAINT "t_user_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "uni_t_user_username" UNIQUE ("username"),
   CONSTRAINT "uni_t_user_user_code" UNIQUE ("user_code"),
-  CONSTRAINT "uni_t_user_user_no" UNIQUE ("user_no")
+  CONSTRAINT "uni_t_user_user_no" UNIQUE ("user_no"),
+  CONSTRAINT "uni_t_user_username" UNIQUE ("username")
 )
 ;
 
-ALTER TABLE "public"."t_user" 
+ALTER TABLE "public"."t_user"
   OWNER TO "postgres";
 
 CREATE INDEX "idx_t_user_phone" ON "public"."t_user" USING btree (
@@ -49,10 +50,14 @@ COMMENT ON COLUMN "public"."t_user"."email" IS 'Email';
 
 COMMENT ON COLUMN "public"."t_user"."phone" IS 'Phone';
 
-COMMENT ON COLUMN "public"."t_user"."open_id" IS 'WeChat OpenID';
-
 COMMENT ON COLUMN "public"."t_user"."client_ip" IS 'Client IP';
 
 COMMENT ON COLUMN "public"."t_user"."login_at" IS 'Login time';
 
 COMMENT ON COLUMN "public"."t_user"."login_token" IS 'Login token';
+
+COMMENT
+ON COLUMN "public"."t_user"."avatar" IS 'avatar';
+
+COMMENT
+ON COLUMN "public"."t_user"."status" IS '0: Unactivated, 1: Active, 2: Frozen, 3: Deleted';
